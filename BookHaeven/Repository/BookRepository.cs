@@ -1,0 +1,103 @@
+using System;
+using BookHaeven.Data;
+using BookHaeven.Dtos.Book;
+using BookHaeven.Interface;
+using BookHaeven.Mappers;
+using BookHaeven.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookHaeven.Repository;
+
+public class BookRepository : IBookRepository
+{
+
+    private readonly ApplicationDbContext _context;
+
+    public BookRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+    public async Task<Book> CreateAsync(Book book)
+    {
+        await _context.Books.AddAsync(book);
+        await _context.SaveChangesAsync();
+        return book;
+    }
+
+    public Task<Book?> DeleteAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<Book?> GetByIdAsync(Guid id)
+    {
+        return await _context.Books
+            .Include(b => b.Reviews)
+            .FirstOrDefaultAsync(b => b.Id == id);
+    }
+
+    public async Task<Book?> GetByTitleAsync(string title)
+    {
+        return await _context.Books.FirstOrDefaultAsync(b => b.Name.ToLower() == title.ToLower());
+    }
+
+    public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize)
+    {
+        return await _context.Books
+            .OrderBy(b => b.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(b => b.ToViewBookDto())
+            .ToListAsync();
+    }
+
+
+    public async Task<IEnumerable<Book>> SearchAndFilterAsync(BookQueryDto query)
+    {
+        var books = _context.Books
+            .Include(b => b.Reviews)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.Title))
+            books = books.Where(b => b.Name.ToLower().Contains(query.Title.ToLower()));
+
+        if (query.MinPrice.HasValue)
+            books = books.Where(b => b.Price >= query.MinPrice.Value);
+
+        if (query.MaxPrice.HasValue)
+            books = books.Where(b => b.Price <= query.MaxPrice.Value);
+
+        if (!string.IsNullOrWhiteSpace(query.Genre))
+            books = books.Where(b => b.Genre.ToLower() == query.Genre.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(query.Publisher))
+            books = books.Where(b => b.Publisher.ToLower() == query.Publisher.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(query.Author))
+            books = books.Where(b => b.Author.ToLower() == query.Author.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            books = query.SortBy.ToLower() switch
+            {
+                "price_asc" => books.OrderBy(b => b.Price),
+                "price_desc" => books.OrderByDescending(b => b.Price),
+                "title_asc" => books.OrderBy(b => b.Name),
+                "title_desc" => books.OrderByDescending(b => b.Name),
+                "date_desc" => books.OrderByDescending(b => b.PublicationDate),
+                "date_asc" => books.OrderBy(b => b.PublicationDate),
+                "popularity" => books.OrderByDescending(b => b.Reviews.Count), // Simplified popularity
+                _ => books
+            };
+        }
+
+        return await books.ToListAsync();
+    }
+
+
+    public async Task<Book> GetByIsbnAsync(string isbn)
+    {
+        return await _context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn);
+    }
+
+}

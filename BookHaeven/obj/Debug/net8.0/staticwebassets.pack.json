@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/1.webp",
+      "PackagePath": "staticwebassets/images/1.webp"
+    },
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/2.jpg",
+      "PackagePath": "staticwebassets/images/2.jpg"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.BookHaeven.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.BookHaeven.props",
+      "PackagePath": "build\\BookHaeven.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.BookHaeven.props",
+      "PackagePath": "buildMultiTargeting\\BookHaeven.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.BookHaeven.props",
+      "PackagePath": "buildTransitive\\BookHaeven.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

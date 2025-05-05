@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "Hash": "zXe9Y7Plvyzo78TEg0LiFOXQYAoKxBwWgQAt94BFoHI=",
+  "Source": "BookHaeven",
+  "BasePath": "_content/BookHaeven",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "BookHaeven/wwwroot",
+      "Source": "BookHaeven",
+      "ContentRoot": "/home/net/Documents/C/BookHaeven/wwwroot/",
+      "BasePath": "_content/BookHaeven",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/home/net/Documents/C/BookHaeven/wwwroot/images/1.webp",
+      "SourceId": "BookHaeven",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/net/Documents/C/BookHaeven/wwwroot/",
+      "BasePath": "_content/BookHaeven",
+      "RelativePath": "images/1.webp",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/1.webp"
+    },
+    {
+      "Identity": "/home/net/Documents/C/BookHaeven/wwwroot/images/2.jpg",
+      "SourceId": "BookHaeven",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/net/Documents/C/BookHaeven/wwwroot/",
+      "BasePath": "_content/BookHaeven",
+      "RelativePath": "images/2.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/2.jpg"
+    }
+  ]
+}
