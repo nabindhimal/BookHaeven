@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Admin Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">Admin Panel</h1>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Admin Dashboard Buttons -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold mb-6">Dashboard</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+      <!-- Add Book Button -->
+      <a href="add-book.html" class="bg-blue-500 text-white p-6 rounded-lg shadow hover:bg-blue-600 transition text-center">
+        <h3 class="text-lg font-bold mb-2">Add Book</h3>
+        <p class="text-sm">Create a new book listing</p>
+      </a>
+
+      <!-- More buttons can go here later -->
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
+
+      if (!token || role !== 'Admin') {
+        // Not logged in or not admin
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      
+      
+
+      document.getElementById('adminUsername').textContent = username;
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+    });
+  </script>
+</body>
+</html>
+

@@ -3,27 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BookHaven - Catalog</title>
+  <title>BookHaeven - Catalog</title>
   <script src="js/nav.js"></script>
   <script src="js/list.js" defer></script>
   <script src="js/announcement.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    .announcement-item {
-      transition: all 0.2s ease;
-    }
-    .announcement-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-  </style>
 </head>
 <body class="bg-gray-50 p-4">
-  <!-- Announcements will be inserted here by announcement.js -->
   <div class="max-w-5xl mx-auto">
     <h1 class="text-3xl font-bold mb-6 text-center">Book Catalog</h1>
     <div id="book-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-    <div id="pagination" class="flex justify-center mt-8"></div>
+	<div id="pagination" class="flex justify-center"></div>
   </div>
 </body>
 </html>
+

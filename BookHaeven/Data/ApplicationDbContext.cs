@@ -18,6 +18,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Bookmark> Bookmarks { get; set; }
     public DbSet<Review> Reviews { get; set; }
 
+    public DbSet<Announcement> Announcements { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

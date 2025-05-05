@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="bg-gray-100">
+
+  <!-- Admin Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">Admin Panel</h1>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Admin Dashboard Buttons -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold mb-6">Dashboard</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+      <!-- Add Book Button -->
+      <a href="add-book.html" class="bg-blue-500 text-white p-6 rounded-lg shadow hover:bg-blue-600 transition text-center">
+        <h3 class="text-lg font-bold mb-2">Add Book</h3>
+        <p class="text-sm">Create a new book listing</p>
+      </a>
+
+      <!-- Add Announcement Button -->
+      <button id="addAnnouncementBtn" class="bg-green-500 text-white p-6 rounded-lg shadow hover:bg-green-600 transition text-center">
+        <h3 class="text-lg font-bold mb-2">Add Announcement</h3>
+        <p class="text-sm">Create a new announcement</p>
+      </button>
+
+      <!-- More buttons can go here later -->
+    </div>
+  </main>
+
+  <!-- Announcement Modal -->
+  <div id="announcementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">Add New Announcement</h3>
+        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+          &times;
+        </button>
+      </div>
+      
+      <form id="announcementForm" class="space-y-4">
+        <div>
+          <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+          <textarea id="message" name="message" rows="3" 
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                    required></textarea>
+        </div>
+        
+        <div>
+          <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time</label>
+          <input type="datetime-local" id="startTime" name="startTime" 
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                 required>
+        </div>
+        
+        <div>
+          <label for="endTime" class="block text-sm font-medium text-gray-700">End Time</label>
+          <input type="datetime-local" id="endTime" name="endTime" 
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                 required>
+        </div>
+        
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Create Announcement
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Notification -->
+  <div id="successNotification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Announcement created successfully!
+  </div>
+
+  <!-- Error Notification -->
+  <div id="errorNotification" class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Error creating announcement!
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
+
+      if (!token || role !== 'Admin') {
+        // Not logged in or not admin
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('adminUsername').textContent = username;
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+
+      // Modal elements
+      const modal = document.getElementById('announcementModal');
+      const addBtn = document.getElementById('addAnnouncementBtn');
+      const closeBtn = document.getElementById('closeModalBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const form = document.getElementById('announcementForm');
+      const successNotification = document.getElementById('successNotification');
+      const errorNotification = document.getElementById('errorNotification');
+
+      // Initialize datetime pickers
+      flatpickr("#startTime", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today"
+      });
+
+      flatpickr("#endTime", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today"
+      });
+
+      // Show modal
+      addBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+
+      // Hide modal
+      function closeModal() {
+        modal.classList.add('hidden');
+        form.reset();
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+
+
+		// Replace the form submission event listener with this:
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const message = document.getElementById('message').value;
+  const startTimeInput = document.getElementById('startTime').value;
+  const endTimeInput = document.getElementById('endTime').value;
+
+  // Convert the datetime strings to ISO format
+  const startTime = new Date(startTimeInput).toISOString();
+  const endTime = new Date(endTimeInput).toISOString();
+
+  try {
+    const response = await fetch('http://localhost:5036/api/announcements', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        Message: message,
+        StartTime: startTime,
+        EndTime: endTime
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create announcement');
+    }
+
+    // Show success notification
+    successNotification.classList.remove('hidden');
+    setTimeout(() => {
+      successNotification.classList.add('hidden');
+    }, 3000);
+
+    // Close modal and reset form
+    closeModal();
+  } catch (error) {
+    console.error('Error creating announcement:', error);
+    
+    // Show error notification
+    errorNotification.textContent = error.message || 'Error creating announcement!';
+    errorNotification.classList.remove('hidden');
+    setTimeout(() => {
+      errorNotification.classList.add('hidden');
+    }, 3000);
+  }
+});
+
+    });
+  </script>
+</body>
+</html>
