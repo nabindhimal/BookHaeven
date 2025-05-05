@@ -23,6 +23,7 @@ namespace BookHaeven.Controllers
             _repo = repo;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookDto createBookDto)
         {

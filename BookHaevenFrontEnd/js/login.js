@@ -24,11 +24,37 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const result = await res.json();
-      localStorage.setItem("token", result.token);
-      window.location.href = "index.html";
+      const token = result.token;
+      
+      localStorage.setItem("token", token);
+      
+      // Decode JWT payload
+    const payloadBase64 = token.split('.')[1];
+    const decodedPayload = JSON.parse(atob(payloadBase64));
+
+    // Extract username and role from claims
+    const username = decodedPayload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+    const role = decodedPayload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+    localStorage.setItem("username", username);
+    localStorage.setItem("role", role);
+      
+      //const payload = parseJwt(token);
+      //const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      
+      if (role === "Admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+      
+      // window.location.href = "index.html";
     } catch (err) {
       document.getElementById("error").textContent = "Something went wrong.";
     }
   });
 });
 
+
+      
+  

@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
-  const pageSize = 9;
+  const pageSize = 6;
 
   const listContainer = document.getElementById("book-list");
   const paginationContainer = document.getElementById("pagination");
@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const books = await res.json();
       listContainer.innerHTML = books.map(book => `
         <div class="bg-white rounded shadow p-4">
+<div class="mb-6">
+			<img src="http://localhost:5036${book.imageUrl}" alt="Book Cover" class="w-48 h-auto rounded shadow">
+          </div>
           <h2 class="text-xl font-semibold">${book.name}</h2>
           <p class="text-gray-600 mb-2">${book.author}</p>
           <p class="text-blue-500 font-bold mb-2">$${book.price}</p>

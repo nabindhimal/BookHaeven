@@ -9,6 +9,26 @@
       "PackagePath": "staticwebassets/images/2.jpg"
     },
     {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/3.webp",
+      "PackagePath": "staticwebassets/images/3.webp"
+    },
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/lord.jpeg",
+      "PackagePath": "staticwebassets/images/lord.jpeg"
+    },
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/magic.jpg",
+      "PackagePath": "staticwebassets/images/magic.jpg"
+    },
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/war.webp",
+      "PackagePath": "staticwebassets/images/war.webp"
+    },
+    {
+      "Id": "/home/net/Documents/C/BookHaeven/wwwroot/images/woman.webp",
+      "PackagePath": "staticwebassets/images/woman.webp"
+    },
+    {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.BookHaeven.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },
