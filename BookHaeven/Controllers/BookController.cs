@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BookHaeven.Dtos.Book;
 using BookHaeven.Interface;
@@ -48,7 +49,7 @@ namespace BookHaeven.Controllers
 
         }
 
-        
+
         [HttpGet("{Id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
@@ -67,16 +68,50 @@ namespace BookHaeven.Controllers
         }
 
 
+        // [HttpGet("search")]
+        // public async Task<IActionResult> SearchBooks([FromQuery] BookQueryDto query)
+        // {
+
+        //     var books = await _repo.SearchAndFilterAsync(query);
+        //     var bookDtos = books.Select(b => b.ToViewBookDto()).ToList();
+        //     if (bookDtos.Count == 0) return Ok(new {message = "No books match the given criteria."});
+
+        //     return Ok(bookDtos);
+        // }
+
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchBooks([FromQuery] BookQueryDto query)
         {
+            // Add CORS headers
+            Response.Headers.Append("Access-Control-Allow-Origin", "*");
 
+            // Log the incoming query parameters (case insensitive)
+            Console.WriteLine($"Searching books with parameters: {JsonSerializer.Serialize(query)}");
+            
+            // Log the incoming query parameters
+            Console.WriteLine($"Searching books with parameters: Title = {query.Title}, Genre = {query.Genre}, SortBy = {query.SortBy}");
+
+            // Perform the search and fetch results
             var books = await _repo.SearchAndFilterAsync(query);
-            var bookDtos = books.Select(b => b.ToViewBookDto()).ToList();
-            if (bookDtos.Count == 0) return Ok("No books match the given criteria.");
 
+            // Log the number of books found
+            Console.WriteLine($"Number of books found: {books.Count()}");
+
+            var bookDtos = books.Select(b => b.ToViewBookDto()).ToList();
+
+            if (bookDtos.Count == 0)
+            {
+                // Log when no books are found
+                Console.WriteLine("No books found that match the criteria.");
+                return Ok(new { message = "No books match the given criteria." });
+            }
+
+            // Log when books are found and returned
+            Console.WriteLine($"Returning {bookDtos.Count} books.");
             return Ok(bookDtos);
         }
+
     }
 
 

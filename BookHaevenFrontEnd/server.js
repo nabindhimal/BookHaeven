@@ -13,6 +13,10 @@ app.get('/book', (req, res) => {
   res.sendFile(path.join(__dirname, 'book.html'));
 });
 
+app.get('/search', (req, res) => {
+  res.sendFile(path.join(__dirname, 'search.html'));
+});
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
