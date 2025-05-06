@@ -1,31 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const pageSize = 6;
-  let token = localStorage.getItem("token");
+  let token = localStorage.getItem("token"); // Make this let instead of const
 
   const listContainer = document.getElementById("book-list");
   const paginationContainer = document.getElementById("pagination");
 
-  // Function to check authentication status
-  function isAuthenticated() {
+  // Function to check if user is logged in
+  function checkAuth() {
     token = localStorage.getItem("token");
-    return token !== null;
+    return !!token;
   }
 
   async function loadBooks(page = 1) {
     try {
       listContainer.innerHTML = '<div class="col-span-3 text-center py-12"><div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div><p class="mt-2 text-gray-600">Loading books...</p></div>';
       
-      // Include authorization header if authenticated
-      const headers = {};
-      if (isAuthenticated()) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const res = await fetch(`http://localhost:5036/api/books/paginated?page=${page}&pageSize=${pageSize}`, {
-        headers
-      });
-      
+      const res = await fetch(`http://localhost:5036/api/books/paginated?page=${page}&pageSize=${pageSize}`);
       if (!res.ok) throw new Error("Failed to load books");
 
       const books = await res.json();
@@ -37,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       listContainer.innerHTML = books.map(book => `
         <div class="book-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-          ${isAuthenticated() ? `
+          ${checkAuth() ? `
             <button class="bookmark-btn" data-book-id="${book.id}" data-bookmarked="${book.isBookmarked}">
               <svg class="bookmark-icon" viewBox="0 0 24 24" fill="${book.isBookmarked ? 'gold' : 'none'}" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -69,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `).join("");
 
       // Add event listeners to bookmark buttons
-      if (isAuthenticated()) {
+      if (checkAuth()) {
         document.querySelectorAll('.bookmark-btn').forEach(btn => {
           btn.addEventListener('click', toggleBookmark);
         });
@@ -96,71 +87,52 @@ document.addEventListener("DOMContentLoaded", () => {
     const svg = btn.querySelector('svg');
     
     try {
-      if (!isAuthenticated()) {
+      // First, check if we still have a valid token
+      if (!checkAuth()) {
         throw new Error('Please log in to bookmark books');
       }
 
       // Optimistic UI update
-      const newBookmarkedState = !isBookmarked;
-      svg.setAttribute('fill', newBookmarkedState ? 'gold' : 'none');
-      btn.setAttribute('data-bookmarked', newBookmarkedState.toString());
+      svg.setAttribute('fill', isBookmarked ? 'none' : 'gold');
+      btn.setAttribute('data-bookmarked', (!isBookmarked).toString());
 
-      if (newBookmarkedState) {
-        // Adding a new bookmark
-        const response = await fetch('http://localhost:5036/api/bookmarks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ bookId })
-        });
+      // Determine the correct endpoint
+      const endpoint = isBookmarked 
+        ? `http://localhost:5036/api/bookmarks/check/${bookId}`
+        : 'http://localhost:5036/api/bookmarks';
 
-        if (!response.ok) {
-          throw new Error('Failed to add bookmark');
-        }
-      } else {
-        // Removing a bookmark - we need to find the bookmark ID first
-        const bookmarksResponse = await fetch('http://localhost:5036/api/bookmarks', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+      const response = await fetch(endpoint, {
+        method: isBookmarked ? 'DELETE' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: !isBookmarked ? JSON.stringify({ bookId }) : undefined
+      });
 
-        if (!bookmarksResponse.ok) {
-          throw new Error('Failed to fetch bookmarks');
-        }
-
-        const bookmarks = await bookmarksResponse.json();
-        const bookmarkToDelete = bookmarks.find(b => b.bookId === bookId);
-
-        if (!bookmarkToDelete) {
-          throw new Error('Bookmark not found');
-        }
-
-        // Now delete using the bookmark ID
-        const deleteResponse = await fetch(`http://localhost:5036/api/bookmarks/${bookmarkToDelete.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!deleteResponse.ok) {
-          throw new Error('Failed to remove bookmark');
+      if (!response.ok) {
+        // Revert if API call fails
+        svg.setAttribute('fill', isBookmarked ? 'gold' : 'none');
+        btn.setAttribute('data-bookmarked', isBookmarked.toString());
+        
+        if (response.status === 401) {
+          throw new Error('Session expired. Please log in again.');
+        } else {
+          throw new Error('Failed to update bookmark');
         }
       }
+
+      // Reload the book data to ensure consistency
+      loadBooks(currentPage);
+      
     } catch (error) {
       console.error('Error toggling bookmark:', error);
-      // Revert UI on error
-      svg.setAttribute('fill', isBookmarked ? 'gold' : 'none');
-      btn.setAttribute('data-bookmarked', isBookmarked.toString());
       alert(error.message);
     }
   }
 
   function renderPagination(current) {
-    const totalPages = 10; // Adjust based on your API
+    const totalPages = 10; // You might want to get this from your API
 
     paginationContainer.innerHTML = "";
 
@@ -177,10 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Page numbers
-    const startPage = Math.max(1, current - 2);
-    const endPage = Math.min(totalPages, current + 2);
-    
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       const button = document.createElement("button");
       button.textContent = i;
       button.className = `px-3 py-1 mx-1 rounded ${i === current ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
@@ -207,15 +176,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial load
   loadBooks(currentPage);
 
-  // Listen for storage changes (login/logout)
+  // Listen for auth changes (like login/logout)
   window.addEventListener('storage', (event) => {
     if (event.key === 'token') {
       loadBooks(currentPage);
     }
-  });
-
-  // Listen for auth changes from our own tab
-  window.addEventListener('authChange', () => {
-    loadBooks(currentPage);
   });
 });

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BookHaeven.Dtos.Book;
@@ -16,11 +17,13 @@ namespace BookHaeven.Controllers
     public class BookController : ControllerBase
     {
         private readonly IBookRepository _repo;
+        private readonly IBookmarkRepository _bookmarkRepo;
 
 
-        public BookController(IBookRepository repo)
+        public BookController(IBookRepository repo, IBookmarkRepository bookmarkRepo)
         {
             _repo = repo;
+            _bookmarkRepo = bookmarkRepo;
         }
 
         [Authorize(Roles = "Admin")]
@@ -56,15 +59,40 @@ namespace BookHaeven.Controllers
         {
             var Book = await _repo.GetByIdAsync(Id);
             if (Book == null) return NotFound();
+
+            // Add bookmark status if user is authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                Book.IsBookmarked = await _bookmarkRepo.IsBookmarkedAsync(userId, Id);
+            }
+
             return Ok(Book.ToViewBookDto());
         }
 
 
 
+        // [HttpGet("paginated")]
+        // public async Task<IActionResult> GetPaginatedBooks([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        // {
+        //     var books = await _repo.GetPaginatedAsync(page, pageSize);
+        //     return Ok(books);
+        // }
+
         [HttpGet("paginated")]
-        public async Task<IActionResult> GetPaginatedBooks([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<List<ViewBookDto>>> GetPaginatedBooks(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
         {
-            var books = await _repo.GetPaginatedAsync(page, pageSize);
+            Guid? userId = null;
+
+            // Check if user is authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            }
+
+            var books = await _repo.GetPaginatedAsync(page, pageSize, userId);
             return Ok(books);
         }
 
@@ -89,7 +117,7 @@ namespace BookHaeven.Controllers
 
             // Log the incoming query parameters (case insensitive)
             Console.WriteLine($"Searching books with parameters: {JsonSerializer.Serialize(query)}");
-            
+
             // Log the incoming query parameters
             Console.WriteLine($"Searching books with parameters: Title = {query.Title}, Genre = {query.Genre}, SortBy = {query.SortBy}");
 

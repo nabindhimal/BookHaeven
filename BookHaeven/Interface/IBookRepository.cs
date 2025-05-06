@@ -12,7 +12,7 @@ public interface IBookRepository
     // Task<Book?> UpdateAsync(Guid id, UpdateBookDto bookDto);
     Task<Book?> DeleteAsync(Guid id);
 
-    Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize);
+    Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize, Guid? userId);
     Task<Book?> GetByTitleAsync(string title);
 
     Task<IEnumerable<Book>> SearchAndFilterAsync(BookQueryDto query);

@@ -52,6 +52,8 @@ public class Book
     // Sale Info
     public bool IsOnSale { get; set; }
 
+    public bool IsBookmarked { get; set; } = false;
+
     [Range(0, 100)]
     public decimal? DiscountPercentage { get; set; }
 

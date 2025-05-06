@@ -10,7 +10,7 @@ public static class BookMapper
     {
         return new Book
         {
-            Id = Guid.NewGuid(), // Generate a new ID
+            Id = Guid.NewGuid(),
             Name = createBookDto.Name,
             ISBN = createBookDto.ISBN,
             Description = createBookDto.Description,
@@ -59,7 +59,8 @@ public static class BookMapper
             SaleEndDate = book.SaleEndDate,
             CreatedAt = book.CreatedAt,
             AverageRating = book.AverageRating,
-            ImageUrl = book.ImageUrl
+            ImageUrl = book.ImageUrl,
+            IsBookmarked = book.IsBookmarked
         };
     }
 

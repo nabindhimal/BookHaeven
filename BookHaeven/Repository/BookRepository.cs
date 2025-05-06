@@ -41,9 +41,50 @@ public class BookRepository : IBookRepository
         return await _context.Books.FirstOrDefaultAsync(b => b.Name.ToLower() == title.ToLower());
     }
 
-    public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize)
+    // public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize)
+    // {
+    //     return await _context.Books
+    //         .OrderBy(b => b.Name)
+    //         .Skip((pageNumber - 1) * pageSize)
+    //         .Take(pageSize)
+    //         .Select(b => b.ToViewBookDto())
+    //         .ToListAsync();
+    // }
+
+
+    public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize, Guid? userId = null)
     {
-        return await _context.Books
+        var query = _context.Books.AsQueryable();
+
+        // If userId is provided, include bookmark information
+        if (userId.HasValue)
+        {
+            query = query.Select(b => new Book
+            {
+                Id = b.Id,
+                Name = b.Name,
+                ISBN = b.ISBN,
+                Author = b.Author,
+                Description = b.Description,
+                Price = b.Price,
+                Stock = b.Stock,
+                Language = b.Language,
+                Publisher = b.Publisher,
+                PublicationDate = b.PublicationDate,
+                Genre = b.Genre,
+                DiscountPercentage = b.DiscountPercentage,
+                IsOnSale = b.IsOnSale,
+                ImageUrl = b.ImageUrl,
+                AverageRating = b.AverageRating,
+                SaleStartDate = b.SaleStartDate,
+                SaleEndDate = b.SaleEndDate,
+                CreatedAt = DateTime.UtcNow,
+                IsAvailableInLibrary = b.IsAvailableInLibrary,
+                IsBookmarked = b.Bookmarks.Any(bm => bm.UserId == userId.Value)
+            });
+        }
+
+        return await query
             .OrderBy(b => b.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)

@@ -23,6 +23,8 @@ public class ViewBookDto
     public bool IsAvailableInLibrary { get; set; }
 
     public bool IsOnSale { get; set; }
+
+    public bool IsBookmarked { get; set; } = false;
     public decimal? DiscountPercentage { get; set; }
 
     public DateTime? SaleStartDate { get; set; }
