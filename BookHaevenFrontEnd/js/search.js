@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const headerContainer = document.createElement("div");
   headerContainer.className = "flex items-center justify-between mb-8";
 
-  // Add Book Haven logo/link on the left
   const logoLink = document.createElement("a");
   logoLink.href = "index.html";
   logoLink.className = "text-2xl font-bold text-blue-600 hover:text-blue-800 transition-colors";
@@ -212,19 +211,6 @@ function displaySearchError(message) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-// Add these functions to search.js (similar to list.js)
 async function addToCart(bookId, quantity = 1) {
   try {
     const token = localStorage.getItem("token");

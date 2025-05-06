@@ -13,221 +13,27 @@
     </div>
   </div>
 
-  <!-- <script> -->
-
-
-	  <!-- // Add these functions to the script section in book.html -->
-<!-- async function addToCart(bookId, quantity = 1) { -->
-  <!-- try { -->
-  <!--   const token = localStorage.getItem("token"); -->
-  <!--   if (!token) { -->
-  <!--     throw new Error('Please log in to add items to cart'); -->
-  <!--   } -->
-
-  <!--   const response = await fetch('http://localhost:5036/api/cart/add', { -->
-  <!--     method: 'POST', -->
-  <!--     headers: { -->
-  <!--       'Content-Type': 'application/json', -->
-  <!--       'Authorization': `Bearer ${token}` -->
-  <!--     }, -->
-  <!--     body: JSON.stringify({ bookId, quantity }) -->
-  <!--   }); -->
-
-  <!--   if (!response.ok) { -->
-  <!--     const errorData = await response.json(); -->
-  <!--     throw new Error(errorData.message || 'Failed to add to cart'); -->
-  <!--   } -->
-
-  <!--   const result = await response.json(); -->
-    
-  <!--   showToast('Item added to cart successfully'); -->
-  <!--   updateCartCount(); -->
-    
-  <!--   return result; -->
-  <!-- } catch (error) { -->
-  <!--   console.error('Error adding to cart:', error); -->
-  <!--   showToast(error.message, 'error'); -->
-  <!-- } -->
-<!-- } -->
-
-<!-- function showToast(message, type = 'success') { -->
-  <!-- const toast = document.createElement('div'); -->
-  <!-- toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${ -->
-  <!--   type === 'success' ? 'bg-green-500' : 'bg-red-500' -->
-  <!-- } text-white`; -->
-  <!-- toast.textContent = message; -->
-  <!-- document.body.appendChild(toast); -->
   
-  <!-- setTimeout(() => { -->
-  <!--   toast.remove(); -->
-  <!-- }, 3000); -->
-<!-- } -->
-
-
-
-
-
-
-
-
-
-  <!--   function getBookId() { -->
-  <!--     const urlParams = new URL(window.location.href).searchParams; -->
-  <!--     let bookId = urlParams.get('id'); -->
-
-  <!--     if (!bookId) { -->
-  <!--       const hashParams = new URLSearchParams(window.location.hash.substring(1)); -->
-  <!--       bookId = hashParams.get('id'); -->
-  <!--     } -->
-
-  <!--     console.log('Full URL:', window.location.href); -->
-  <!--     console.log('Extracted Book ID:', bookId); -->
-
-  <!--     return bookId; -->
-  <!--   } -->
-
-  <!--   async function loadBookDetails() { -->
-  <!--     const bookId = getBookId(); -->
-
-  <!--     if (!bookId) { -->
-  <!--       document.getElementById('bookDetails').innerHTML = ` -->
-  <!--         <div class="text-red-600"> -->
-  <!--           <p>Book ID is missing.</p> -->
-  <!--           <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a> -->
-  <!--         </div> -->
-  <!--       `; -->
-  <!--       return; -->
-  <!--     } -->
-
-  <!--     try { -->
-  <!--       const response = await fetch(`http://localhost:5036/api/books/${bookId}`); -->
-  <!--       if (!response.ok) throw new Error('Book not found (HTTP ' + response.status + ')'); -->
-  <!--       const book = await response.json(); -->
-
-		<!-- console.log("Image URL from API:", book.imageUrl); -->
-
-  <!--       document.getElementById('bookDetails').innerHTML = ` -->
-  <!--         <h1 class="text-3xl font-bold mb-4">${book.name}</h1> -->
-
-  <!--         <div class="mb-6"> -->
-			<!-- <img src="http://localhost:5036${book.imageUrl}" alt="Book Cover" class="w-48 h-auto rounded shadow"> -->
-  <!--         </div> -->
-
-  <!--         <div class="grid grid-cols-1 gap-2 text-gray-700 mb-4"> -->
-  <!--           <p><strong>Author:</strong> ${book.author}</p> -->
-  <!--           <p><strong>Publisher:</strong> ${book.publisher}</p> -->
-  <!--           <p><strong>ISBN:</strong> ${book.isbn}</p> -->
-  <!--           <p><strong>Language:</strong> ${book.language}</p> -->
-  <!--           <p><strong>Genre:</strong> ${book.genre}</p> -->
-  <!--           <p><strong>Publication Date:</strong> ${new Date(book.publicationDate).toLocaleDateString()}</p> -->
-  <!--           <p><strong>Available in Library:</strong> ${book.isAvailableInLibrary ? 'Yes' : 'No'}</p> -->
-  <!--           <p><strong>Stock:</strong> ${book.stock}</p> -->
-  <!--         </div> -->
-
-<!-- <div class="mb-6 flex gap-4"> -->
-  <!-- <button onclick="addToCart('${book.id}')" --> 
-  <!--         class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"> -->
-  <!--   Add to Cart -->
-  <!-- </button> -->
-  <!-- <a href="index.html" class="text-blue-600 hover:underline px-4 py-2">← Back to catalog</a> -->
-<!-- </div> -->
-
-  <!--         <div class="mb-4 text-lg"> -->
-  <!--           <strong>Price:</strong> -->
-  <!--           ${book.isOnSale && book.discountedPrice --> 
-  <!--             ? `<span class="line-through text-red-500 mr-2">$${book.price.toFixed(2)}</span> -->
-  <!--                <span class="text-green-600 font-semibold">$${book.discountedPrice.toFixed(2)} (${book.discountPercentage}% OFF)</span>` -->
-  <!--             : `<span class="text-black font-semibold">$${book.price.toFixed(2)}</span>` -->
-  <!--           } -->
-  <!--         </div> -->
-
-  <!--         ${book.averageRating --> 
-  <!--           ? `<div class="mb-4 text-yellow-600">★ ${book.averageRating.toFixed(1)} / 5</div>` --> 
-  <!--           : '' -->
-  <!--         } -->
-
-  <!--         <div class="mb-6"> -->
-  <!--           <p class="text-gray-800">${book.description || '<em>No description provided.</em>'}</p> -->
-  <!--         </div> -->
-
-  <!--         <a href="index.html" class="text-blue-600 hover:underline">← Back to catalog</a> -->
-  <!--       `; -->
-  <!--     } catch (error) { -->
-  <!--       document.getElementById('bookDetails').innerHTML = ` -->
-  <!--         <div class="text-red-600"> -->
-  <!--           <p>Error loading book: ${error.message}</p> -->
-  <!--           <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a> -->
-  <!--         </div> -->
-  <!--       `; -->
-  <!--     } -->
-  <!--   } -->
-
-  <!--   document.addEventListener('DOMContentLoaded', loadBookDetails); -->
-  <!-- </script> -->
-<!-- </body> -->
-<!-- </html> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <script>
 
 
-	// In book.html
 function getBookId() {
-  // First try standard query parameter (?id=...)
   const urlParams = new URLSearchParams(window.location.search);
   let bookId = urlParams.get('id');
 
-  // If not found, try hash parameter (#id=...)
   if (!bookId) {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     bookId = hashParams.get('id');
   }
 
-  // If still not found, check the path
   if (!bookId) {
     const pathParts = window.location.pathname.split('/');
     bookId = pathParts[pathParts.length - 1];
-    // Remove any file extensions or query strings
     bookId = bookId.split('?')[0].split('#')[0];
   }
 
-  // Validate the ID format
   if (!bookId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookId)) {
     console.error('Invalid book ID format:', bookId);
     return null;
@@ -240,39 +46,6 @@ function getBookId() {
 }
 
 
-
-
-
-
-
-
-
-
-//  function getBookId() {
-    // First try standard query parameter (?id=...)
-  //  const urlParams = new URLSearchParams(window.location.search);
-    //let bookId = urlParams.get('id');
-
-    // If not found, try hash parameter (#id=...)
-    //if (!bookId) {
-     // const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      //bookId = hashParams.get('id');
-   // }
-
-    // If still not found, check if the URL ends with the ID directly
-    //if (!bookId) {
-     // const pathParts = window.location.pathname.split('/');
-      //const lastPart = pathParts[pathParts.length - 1];
-      //if (lastPart && lastPart !== 'book') {
-        //bookId = lastPart;
-      //}
-   // }
-
-    //console.log('Full URL:', window.location.href);
-   // console.log('Extracted Book ID:', bookId);
-
-    //return bookId;
-  //}
 
   async function loadBookDetails() {
     const bookId = getBookId();
