@@ -112,19 +112,13 @@ namespace BookHaeven.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchBooks([FromQuery] BookQueryDto query)
         {
-            // Add CORS headers
+            // CORS headers
             Response.Headers.Append("Access-Control-Allow-Origin", "*");
 
-            // Log the incoming query parameters (case insensitive)
+            // Logging from backend to solve integration problem with frontend
             Console.WriteLine($"Searching books with parameters: {JsonSerializer.Serialize(query)}");
-
-            // Log the incoming query parameters
             Console.WriteLine($"Searching books with parameters: Title = {query.Title}, Genre = {query.Genre}, SortBy = {query.SortBy}");
-
-            // Perform the search and fetch results
             var books = await _repo.SearchAndFilterAsync(query);
-
-            // Log the number of books found
             Console.WriteLine($"Number of books found: {books.Count()}");
 
             var bookDtos = books.Select(b => b.ToViewBookDto()).ToList();

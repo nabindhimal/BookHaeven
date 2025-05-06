@@ -61,9 +61,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="ml-1 text-gray-700">${(book.averageRating || 0).toFixed(1)}</span>
               </div>
             </div>
-            <a href="book.html?id=${book.id}" class="mt-4 block text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
-              View Details
-            </a>
+		            
+
+
+<a href="book.html?id=${book.id}" class="mt-2 block text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+  View Details
+</a>
+<button onclick="addToCart('${book.id}')" class="mt-2 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition">
+  Add to Cart
+</button>
+
+
           </div>
         </div>
       `).join("");
@@ -219,3 +227,92 @@ document.addEventListener("DOMContentLoaded", () => {
     loadBooks(currentPage);
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add this near the top with other functions
+async function addToCart(bookId, quantity = 1) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error('Please log in to add items to cart');
+    }
+
+    const response = await fetch('http://localhost:5036/api/cart/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ bookId, quantity })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to add to cart');
+    }
+
+    const result = await response.json();
+    
+    // Show success message
+    showToast('Item added to cart successfully');
+    
+    // Update cart count in UI
+    updateCartCount();
+    
+    return result;
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    showToast(error.message, 'error');
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+  } text-white`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

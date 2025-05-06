@@ -20,6 +20,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Announcement> Announcements { get; set; }
 
+    public DbSet<Cart> Carts { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

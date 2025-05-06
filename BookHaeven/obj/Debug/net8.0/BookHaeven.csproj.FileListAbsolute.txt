@@ -142,3 +142,4 @@
 /home/net/Documents/C/BookHaeven/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /home/net/Documents/C/BookHaeven/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
 /home/net/Documents/C/BookHaeven/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
+/home/net/Documents/C/BookHaeven/obj/Debug/net8.0/BookHaeven.sourcelink.json

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart - BookHaven</title>
+  <script src="js/nav.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Your Cart</h1>
+    <div id="cart-items" class="space-y-4">
+      <!-- Cart items will be loaded here -->
+    </div>
+    <div id="empty-cart" class="text-center py-12 hidden">
+      <p class="text-gray-500 mb-4">Your cart is empty</p>
+      <a href="index.html" class="text-blue-500 hover:underline">Continue shopping</a>
+    </div>
+    <div id="cart-summary" class="mt-6 border-t pt-4 hidden">
+      <div class="flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button id="checkout-btn" class="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCart();
+    });
+
+    async function loadCart() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5036/api/cart", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to load cart");
+
+        const cartItems = await response.json();
+        
+        const cartItemsContainer = document.getElementById("cart-items");
+        const emptyCartMessage = document.getElementById("empty-cart");
+        const cartSummary = document.getElementById("cart-summary");
+
+        if (cartItems.length === 0) {
+          emptyCartMessage.classList.remove("hidden");
+          cartSummary.classList.add("hidden");
+          return;
+        }
+
+        emptyCartMessage.classList.add("hidden");
+        cartSummary.classList.remove("hidden");
+
+        cartItemsContainer.innerHTML = cartItems.map(item => `
+          <div class="cart-item flex border-b pb-4" data-id="${item.id}">
+            <div class="w-24 h-24 bg-gray-200 rounded overflow-hidden">
+              <img src="http://localhost:5036${item.bookImageUrl}" alt="${item.bookTitle}" class="w-full h-full object-cover">
+            </div>
+            <div class="ml-4 flex-1">
+              <h3 class="font-semibold">${item.bookTitle}</h3>
+              ${item.discountPercentage ? `
+                <div class="flex items-center">
+                  <span class="text-gray-500 line-through mr-2">$${item.originalPrice.toFixed(2)}</span>
+                  <span class="text-green-600">$${item.price.toFixed(2)} (${item.discountPercentage}% off)</span>
+                </div>
+              ` : `
+                <span class="text-gray-600">$${item.originalPrice.toFixed(2)}</span>
+              `}
+              <div class="flex items-center mt-2">
+                <button class="quantity-btn" data-action="decrease">-</button>
+                <span class="quantity mx-2">${item.quantity}</span>
+                <button class="quantity-btn" data-action="increase">+</button>
+                <span class="text-sm text-gray-500 ml-2">${item.availableStock} available</span>
+                <button class="remove-btn ml-auto text-red-500 hover:text-red-700">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join("");
+
+        // Calculate total
+        const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById("cart-total").textContent = `$${total.toFixed(2)}`;
+
+        // Add event listeners
+        document.querySelectorAll(".quantity-btn").forEach(btn => {
+          btn.addEventListener("click", updateQuantity);
+        });
+
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+          btn.addEventListener("click", removeItem);
+        });
+
+      } catch (error) {
+        console.error("Error loading cart:", error);
+        alert("Failed to load cart. Please try again.");
+      }
+    }
+
+    async function updateQuantity(e) {
+      const btn = e.currentTarget;
+      const action = btn.getAttribute("data-action");
+      const itemElement = btn.closest(".cart-item");
+      const itemId = itemElement.getAttribute("data-id");
+      const quantityElement = itemElement.querySelector(".quantity");
+      const availableStock = parseInt(itemElement.querySelector(".available-stock").textContent);
+      let quantity = parseInt(quantityElement.textContent);
+
+      if (action === "increase") {
+        if (quantity >= availableStock) {
+          alert("Cannot add more than available stock");
+          return;
+        }
+        quantity += 1;
+      } else if (action === "decrease" && quantity > 1) {
+        quantity -= 1;
+      }
+
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ quantity })
+        });
+
+        if (!response.ok) throw new Error("Failed to update quantity");
+
+        quantityElement.textContent = quantity;
+        loadCart(); // Refresh cart to update total
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        alert("Failed to update quantity. Please try again.");
+      }
+    }
+
+    async function removeItem(e) {
+      const itemElement = e.currentTarget.closest(".cart-item");
+      const itemId = itemElement.getAttribute("data-id");
+
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to remove item");
+
+        itemElement.remove();
+        loadCart(); // Refresh cart to check if empty
+      } catch (error) {
+        console.error("Error removing item:", error);
+        alert("Failed to remove item. Please try again.");
+      }
+    }
+
+    document.getElementById("checkout-btn").addEventListener("click", () => {
+      alert("Checkout functionality will be implemented soon!");
+    });
+  </script>
+</body>
+</html>

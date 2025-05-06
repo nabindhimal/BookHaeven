@@ -127,7 +127,7 @@ public class BookRepository : IBookRepository
                 "title_desc" => books.OrderByDescending(b => b.Name),
                 "date_desc" => books.OrderByDescending(b => b.PublicationDate),
                 "date_asc" => books.OrderBy(b => b.PublicationDate),
-                "popularity" => books.OrderByDescending(b => b.Reviews.Count), // Simplified popularity
+                "popularity" => books.OrderByDescending(b => b.Reviews.Count),
                 _ => books
             };
         }
