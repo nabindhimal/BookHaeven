@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookmarks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4">
+  <!-- Navigation -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center mb-6">
+    <h1 class="text-xl font-bold text-blue-600">
+      <a href="index.html">BookHaven</a>
+    </h1>
+    <div class="flex items-center space-x-4">
+      <span id="username" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">My Bookmarked Books</h1>
+    
+    <!-- Bookmarked Books List -->
+    <div id="bookmarks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    
+    <!-- Empty State -->
+    <div id="empty-state" class="text-center py-12 hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">No bookmarks yet</h3>
+      <p class="mt-1 text-gray-500">Start bookmarking books to see them here.</p>
+      <a href="index.html" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+        Browse Books
+      </a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('username').textContent = username;
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+
+      // Load bookmarked books
+      async function loadBookmarks() {
+        try {
+          const response = await fetch('http://localhost:5036/api/bookmarks', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load bookmarks');
+          }
+
+          const bookmarks = await response.json();
+          renderBookmarks(bookmarks);
+        } catch (error) {
+          console.error('Error loading bookmarks:', error);
+          document.getElementById('empty-state').classList.remove('hidden');
+        }
+      }
+
+      // Render bookmarked books
+      function renderBookmarks(bookmarks) {
+        const bookmarksList = document.getElementById('bookmarks-list');
+        const emptyState = document.getElementById('empty-state');
+
+        if (bookmarks.length === 0) {
+          emptyState.classList.remove('hidden');
+          bookmarksList.innerHTML = '';
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+        bookmarksList.innerHTML = bookmarks.map(bookmark => {
+          const book = bookmark.book;
+          return `
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div class="h-48 bg-gray-200 overflow-hidden">
+                <img src="http://localhost:5036${book.imageUrl}" alt="${book.name}" class="w-full h-full object-cover">
+              </div>
+              <div class="p-4">
+                <h3 class="font-bold text-lg mb-1 truncate">${book.name}</h3>
+                <p class="text-gray-600 mb-2">${book.author}</p>
+                <div class="flex justify-between items-center">
+                  ${book.isOnSale && book.discountedPrice 
+                    ? `<span class="line-through text-red-500 mr-2">$${book.price.toFixed(2)}</span>
+                       <span class="text-green-600 font-semibold">$${book.discountedPrice.toFixed(2)}</span>`
+                    : `<span class="text-black font-semibold">$${book.price.toFixed(2)}</span>`
+                  }
+                  <div class="flex items-center">
+                    <span class="text-yellow-500">★</span>
+                    <span class="ml-1 text-gray-700">${(book.averageRating || 0).toFixed(1)}</span>
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-between">
+                  <a href="book.html?id=${book.id}" class="text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
+                    View Details
+                  </a>
+                  <button data-bookmark-id="${bookmark.id}" class="remove-bookmark-btn text-center bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition">
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-bookmark-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const bookmarkId = e.target.getAttribute('data-bookmark-id');
+            if (confirm('Are you sure you want to remove this bookmark?')) {
+              await removeBookmark(bookmarkId);
+            }
+          });
+        });
+      }
+
+      // Remove bookmark
+      async function removeBookmark(bookmarkId) {
+        try {
+          const response = await fetch(`http://localhost:5036/api/bookmarks/${bookmarkId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to remove bookmark');
+          }
+
+          // Reload bookmarks after removal
+          await loadBookmarks();
+        } catch (error) {
+          console.error('Error removing bookmark:', error);
+          alert('Failed to remove bookmark');
+        }
+      }
+
+      // Initial load
+      await loadBookmarks();
+    });
+  </script>
+</body>
+</html>
