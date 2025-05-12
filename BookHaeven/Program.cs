@@ -25,7 +25,7 @@ builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>(); // Implement your email service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // builder.Services.AddCors(options =>
 // {

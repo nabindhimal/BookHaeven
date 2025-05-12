@@ -15,11 +15,13 @@ namespace BookHaeven.Controllers
     {
         private readonly IOrderRepository _orderRepo;
         private readonly IEmailService _emailService;
+        private readonly IUserRepository _userRepository;
 
-        public OrderController(IOrderRepository orderRepo, IEmailService emailService)
+        public OrderController(IOrderRepository orderRepo, IEmailService emailService, IUserRepository userRepository)
         {
             _orderRepo = orderRepo;
             _emailService = emailService;
+            _userRepository = userRepository;
         }
 
 
@@ -35,6 +37,7 @@ namespace BookHaeven.Controllers
         public async Task<ActionResult<OrderDto>> GetOrder(Guid id)
         {
             var userId = GetUserId();
+            
             var order = await _orderRepo.GetByIdAsync(id);
 
             if (order == null)
@@ -42,7 +45,7 @@ namespace BookHaeven.Controllers
                 return NotFound();
             }
 
-            // Users can only see their own orders unless they're staff
+            // Users can only see their own orders
             if (order.UserId != userId)
             {
                 return Forbid();
@@ -55,13 +58,14 @@ namespace BookHaeven.Controllers
         public async Task<ActionResult<OrderDto>> Checkout()
         {
             var userId = GetUserId();
+            var user = await _userRepository.GetByIdAsync(userId);
 
             try
             {
                 var order = await _orderRepo.CreateFromCartAsync(userId);
 
                 // Send email with claim code
-                await _emailService.SendOrderConfirmation(GetUserEmail(), order);
+                await _emailService.SendOrderConfirmation(user.Email, order);
 
                 return Ok(order.ToDto());
             }
@@ -90,7 +94,6 @@ namespace BookHaeven.Controllers
         private Guid GetUserId() =>
             Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-        private string GetUserEmail() =>
-            User.FindFirst(ClaimTypes.Email)?.Value;
+        
     }
 }
