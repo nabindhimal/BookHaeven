@@ -36,6 +36,8 @@ public class OrderItem
     public Guid OrderId { get; set; }
     public Guid BookId { get; set; }
     public int Quantity { get; set; }
+
+    public string BookImageUrl { get; set; }
     public decimal UnitPrice { get; set; }
     public virtual Order Order { get; set; }
     public virtual Book Book { get; set; }

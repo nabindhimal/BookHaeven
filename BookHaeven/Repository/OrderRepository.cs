@@ -50,7 +50,8 @@ public class OrderRepository : IOrderRepository
                 {
                     BookId = cartItem.BookId,
                     Quantity = cartItem.Quantity,
-                    UnitPrice = cartItem.Book.Price
+                    UnitPrice = cartItem.Book.Price,
+                    BookImageUrl = cartItem.Book.ImageUrl
                 });
             }
 

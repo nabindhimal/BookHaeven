@@ -64,14 +64,11 @@
             }
 
             container.innerHTML = orders.map(order => {
-                
                 const items = order.items || [];
                 const totalAmount = order.totalAmount || 0;
                 const discountAmount = order.discountAmount || 0;
                 const status = order.status || 'Unknown';
                 const orderDate = order.orderDate ? new Date(order.orderDate) : new Date();
-
-                console.log("Order items:", items); 
 
                 return `
                     <div class="border rounded-lg overflow-hidden" data-order-id="${order.id}">
@@ -87,16 +84,18 @@
                         
                         <div class="p-4">
                             ${items.length > 0 ? items.map(item => {
-                                
                                 const quantity = item.quantity || 0;
                                 const unitPrice = item.unitPrice || 0;
                                 const extendedPrice = (quantity * unitPrice).toFixed(2);
                                 
+                                // Use bookImageUrl from the item directly (stored at order creation)
+                                const imageUrl = item.bookImageUrl;
+                                
                                 return `
                                     <div class="flex py-2 border-b last:border-b-0">
                                         <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden mr-3">
-                                            ${item.book?.imageUrl ? `
-                                                <img src="http://localhost:5036${item.book.imageUrl}" 
+                                            ${imageUrl ? `
+                                                <img src="${imageUrl.startsWith('http') ? imageUrl : `http://localhost:5036${imageUrl}`}" 
                                                      alt="${item.bookTitle || 'Book'}" 
                                                      class="w-full h-full object-cover">
                                             ` : `
@@ -174,7 +173,6 @@
                     throw new Error(error.message || "Failed to cancel order");
                 }
 
-                
                 const orders = await fetchOrders(token);
                 displayOrders(orders);
                 
