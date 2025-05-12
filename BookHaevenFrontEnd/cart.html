@@ -174,9 +174,45 @@
       }
     }
 
-    document.getElementById("checkout-btn").addEventListener("click", () => {
-      alert("Checkout functionality will be implemented soon!");
+    <!-- document.getElementById("checkout-btn").addEventListener("click", () => { -->
+    <!--   alert("Checkout functionality will be implemented soon!"); -->
+    <!-- }); -->
+
+    
+    document.getElementById("checkout-btn").addEventListener("click", async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5036/api/orders/checkout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Checkout failed");
+        }
+
+        const order = await response.json();
+        
+        // Redirect to order confirmation page with order ID
+        window.location.href = `/order-confirmation.html?id=${order.id}`;
+        
+      } catch (error) {
+        console.error("Checkout error:", error);
+        alert(`Checkout failed: ${error.message}`);
+      }
     });
+
+
+
   </script>
 </body>
 </html>

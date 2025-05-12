@@ -22,6 +22,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Cart> Carts { get; set; }
 
+    public DbSet<Order> Orders { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

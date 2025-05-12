@@ -1,0 +1,41 @@
+document.addEventListener("DOMContentLoaded", async () => {
+    const checkoutBtn = document.getElementById("checkout-btn");
+    checkoutBtn.addEventListener("click", processCheckout);
+});
+
+async function processCheckout() {
+    try {
+        const response = await fetch("/api/orders/checkout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Checkout failed");
+        }
+
+        const order = await response.json();
+        showSuccessMessage(order);
+        
+        // Redirect to order confirmation
+        setTimeout(() => {
+            window.location.href = `/order-confirmation.html?id=${order.id}`;
+        }, 2000);
+
+    } catch (error) {
+        showErrorMessage(error.message);
+    }
+}
+
+function showSuccessMessage(order) {
+    // Show confirmation with claim code
+    alert(`Order successful! Your claim code: ${order.claimCode}`);
+}
+
+function showErrorMessage(message) {
+    alert(`Error: ${message}`);
+}
