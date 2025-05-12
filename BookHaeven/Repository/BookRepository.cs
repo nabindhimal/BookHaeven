@@ -24,9 +24,14 @@ public class BookRepository : IBookRepository
         return book;
     }
 
-    public Task<Book?> DeleteAsync(Guid id)
+    public async Task<Book?> DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var book = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+        if (book == null) return null;
+
+        _context.Books.Remove(book);
+        _context.SaveChanges();
+        return book;
     }
 
     public async Task<Book?> GetByIdAsync(Guid id)
@@ -141,4 +146,48 @@ public class BookRepository : IBookRepository
         return await _context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn);
     }
 
+    public async Task<Book?> UpdateAsync(Guid id, UpdateBookDto bookDto)
+    {
+        var existingBook = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+        if (existingBook == null) return null;
+
+        // Update only the properties that were provided in the DTO
+        if (!string.IsNullOrWhiteSpace(bookDto.Name))
+            existingBook.Name = bookDto.Name;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.ISBN))
+            existingBook.ISBN = bookDto.ISBN;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.Description))
+            existingBook.Description = bookDto.Description;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.Author))
+            existingBook.Author = bookDto.Author;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.Publisher))
+            existingBook.Publisher = bookDto.Publisher;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.Language))
+            existingBook.Language = bookDto.Language;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.Genre))
+            existingBook.Genre = bookDto.Genre;
+
+        if (bookDto.PublicationDate != default)
+            existingBook.PublicationDate = bookDto.PublicationDate;
+
+        existingBook.Price = bookDto.Price;
+        existingBook.Stock = bookDto.Stock;
+        existingBook.IsAvailableInLibrary = bookDto.IsAvailableInLibrary;
+        existingBook.IsOnSale = bookDto.IsOnSale;
+        existingBook.DiscountPercentage = bookDto.DiscountPercentage;
+        existingBook.SaleStartDate = bookDto.SaleStartDate;
+        existingBook.SaleEndDate = bookDto.SaleEndDate;
+
+        if (!string.IsNullOrWhiteSpace(bookDto.ImageUrl))
+            existingBook.ImageUrl = bookDto.ImageUrl;
+
+        await _context.SaveChangesAsync();
+        return existingBook;
+    }
 }

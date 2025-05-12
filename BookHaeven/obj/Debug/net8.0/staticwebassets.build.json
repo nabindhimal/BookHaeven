@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "sJrxN+SWdCFg+VDzrDZtjr3clwVP5GgfDWBE1tRgE1g=",
+  "Hash": "Jknad86BzErzMOrw1nO8wvJ7wiDS5OJPbVOcJ1Ea/Go=",
   "Source": "BookHaeven",
   "BasePath": "_content/BookHaeven",
   "Mode": "Default",
@@ -148,6 +148,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/images/woman.webp"
+    },
+    {
+      "Identity": "/home/net/Documents/C/BookHaeven/wwwroot/images/z.webp",
+      "SourceId": "BookHaeven",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/net/Documents/C/BookHaeven/wwwroot/",
+      "BasePath": "_content/BookHaeven",
+      "RelativePath": "images/z.webp",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/z.webp"
     }
   ]
 }

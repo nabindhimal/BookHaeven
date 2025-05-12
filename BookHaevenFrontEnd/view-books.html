@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - View Books</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <!-- Admin Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">
+      <a href="admin.html">Admin Panel</a>
+    </h1>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-semibold">Manage Books</h2>
+      <a href="add-book.html" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Add New Book
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ISBN</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="booksList" class="bg-white divide-y divide-gray-200">
+            <!-- Books will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div id="pagination" class="flex justify-center mt-8"></div>
+    </div>
+  </main>
+
+  <!-- Success Notification -->
+  <div id="successNotification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Operation completed successfully!
+  </div>
+
+  <!-- Error Notification -->
+  <div id="errorNotification" class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Error performing operation!
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
+
+      if (!token || role !== 'Admin') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('adminUsername').textContent = username;
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+
+      // Elements
+      const booksList = document.getElementById('booksList');
+      const pagination = document.getElementById('pagination');
+      const successNotification = document.getElementById('successNotification');
+      const errorNotification = document.getElementById('errorNotification');
+      
+      let currentPage = 1;
+      const pageSize = 10;
+
+      // Load books
+      async function loadBooks(page = 1) {
+        try {
+          booksList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center">Loading books...</td></tr>';
+          
+          const response = await fetch(`http://localhost:5036/api/books/paginated?page=${page}&pageSize=${pageSize}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) throw new Error('Failed to load books');
+          
+          const books = await response.json();
+          
+          if (books.length === 0) {
+            booksList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center">No books found</td></tr>';
+            return;
+          }
+          
+          renderBooks(books);
+          renderPagination(page);
+        } catch (error) {
+          console.error('Error loading books:', error);
+          booksList.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading books: ${error.message}</td></tr>`;
+          showError(error.message);
+        }
+      }
+
+      // Render books in table
+      function renderBooks(books) {
+        booksList.innerHTML = books.map(book => `
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <img class="h-10 w-10 rounded" src="http://localhost:5036${book.imageUrl}" alt="${book.name}">
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">${book.name}</div>
+                  <div class="text-sm text-gray-500">${book.genre}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${book.author}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${book.isbn}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">$${book.price.toFixed(2)}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${book.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${book.stock}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <a href="edit-book.html?id=${book.id}" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+              <button data-id="${book.id}" class="text-red-600 hover:text-red-900 delete-btn">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+        
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.target.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
+              await deleteBook(id);
+            }
+          });
+        });
+      }
+
+      // Delete book
+      async function deleteBook(id) {
+        try {
+          const response = await fetch(`http://localhost:5036/api/books/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete book');
+          }
+
+          showSuccess('Book deleted successfully');
+          await loadBooks(currentPage);
+        } catch (error) {
+          console.error('Error deleting book:', error);
+          showError(error.message);
+        }
+      }
+
+      // Pagination
+      function renderPagination(current) {
+        // For simplicity, we'll assume there are always more pages
+        // In a real app, you'd get total pages from your API
+        const totalPages = 10; // This should come from your API response
+        
+        pagination.innerHTML = '';
+        
+        // Previous button
+        if (current > 1) {
+          const prevButton = document.createElement('button');
+          prevButton.innerHTML = '&laquo; Previous';
+          prevButton.className = 'px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300';
+          prevButton.addEventListener('click', () => {
+            currentPage = current - 1;
+            loadBooks(currentPage);
+          });
+          pagination.appendChild(prevButton);
+        }
+        
+        // Page numbers
+        const startPage = Math.max(1, current - 2);
+        const endPage = Math.min(totalPages, current + 2);
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const button = document.createElement('button');
+          button.textContent = i;
+          button.className = `px-4 py-2 mx-1 rounded ${i === current ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
+          button.addEventListener('click', () => {
+            currentPage = i;
+            loadBooks(currentPage);
+          });
+          pagination.appendChild(button);
+        }
+        
+        // Next button
+        if (current < totalPages) {
+          const nextButton = document.createElement('button');
+          nextButton.innerHTML = 'Next &raquo;';
+          nextButton.className = 'px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300';
+          nextButton.addEventListener('click', () => {
+            currentPage = current + 1;
+            loadBooks(currentPage);
+          });
+          pagination.appendChild(nextButton);
+        }
+      }
+
+      // Notification helpers
+      function showSuccess(message) {
+        successNotification.textContent = message;
+        successNotification.classList.remove('hidden');
+        setTimeout(() => {
+          successNotification.classList.add('hidden');
+        }, 3000);
+      }
+
+      function showError(message) {
+        errorNotification.textContent = message;
+        errorNotification.classList.remove('hidden');
+        setTimeout(() => {
+          errorNotification.classList.add('hidden');
+        }, 3000);
+      }
+
+      // Initial load
+      loadBooks(currentPage);
+    });
+  </script>
+</body>
+</html>

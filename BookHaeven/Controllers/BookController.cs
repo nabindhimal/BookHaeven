@@ -26,6 +26,10 @@ namespace BookHaeven.Controllers
             _bookmarkRepo = bookmarkRepo;
         }
 
+
+        
+
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookDto createBookDto)
@@ -51,6 +55,34 @@ namespace BookHaeven.Controllers
             await _repo.CreateAsync(book);
             return CreatedAtAction(nameof(GetById), new { id = book.Id }, book.ToViewBookDto());
 
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdatePartial(Guid id, [FromBody] UpdateBookDto updateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Check if ISBN is being changed to one that already exists
+            if (!string.IsNullOrWhiteSpace(updateDto.ISBN))
+            {
+                var existingByIsbn = await _repo.GetByIsbnAsync(updateDto.ISBN);
+                if (existingByIsbn != null && existingByIsbn.Id != id)
+                {
+                    return Conflict(new { message = "A book with the same ISBN already exists." });
+                }
+            }
+
+            var updatedBook = await _repo.UpdateAsync(id, updateDto);
+            if (updatedBook == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedBook.ToViewBookDto());
         }
 
 
@@ -81,8 +113,8 @@ namespace BookHaeven.Controllers
 
         [HttpGet("paginated")]
         public async Task<ActionResult<List<ViewBookDto>>> GetPaginatedBooks(
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
         {
             Guid? userId = null;
 
@@ -133,6 +165,19 @@ namespace BookHaeven.Controllers
             // Log when books are found and returned
             Console.WriteLine($"Returning {bookDtos.Count} books.");
             return Ok(bookDtos);
+        }
+
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            var book = await _repo.DeleteAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
     }

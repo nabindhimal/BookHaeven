@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Book</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="bg-gray-100">
+  <!-- Admin Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">
+      <a href="admin.html">Admin Panel</a>
+    </h1>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-semibold">Edit Book</h2>
+      <a href="view-books.html" class="text-blue-600 hover:underline">← Back to Books</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <form id="editBookForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Basic Info -->
+          <div class="space-y-4">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700">Title*</label>
+              <input type="text" id="name" name="name" required
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="author" class="block text-sm font-medium text-gray-700">Author*</label>
+              <input type="text" id="author" name="author" required
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="isbn" class="block text-sm font-medium text-gray-700">ISBN*</label>
+              <input type="text" id="isbn" name="isbn" required
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="publisher" class="block text-sm font-medium text-gray-700">Publisher</label>
+              <input type="text" id="publisher" name="publisher"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+          
+          <!-- Details -->
+          <div class="space-y-4">
+            <div>
+              <label for="genre" class="block text-sm font-medium text-gray-700">Genre</label>
+              <input type="text" id="genre" name="genre"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+              <input type="text" id="language" name="language"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="publicationDate" class="block text-sm font-medium text-gray-700">Publication Date</label>
+              <input type="date" id="publicationDate" name="publicationDate"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="imageUrl" class="block text-sm font-medium text-gray-700">Image URL</label>
+              <input type="text" id="imageUrl" name="imageUrl"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+          <textarea id="description" name="description" rows="4"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+        </div>
+        
+        <!-- Pricing & Stock -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label for="price" class="block text-sm font-medium text-gray-700">Price*</label>
+            <input type="number" id="price" name="price" min="0" step="0.01" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="stock" class="block text-sm font-medium text-gray-700">Stock*</label>
+            <input type="number" id="stock" name="stock" min="0" required
+                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div class="flex items-end">
+            <div class="flex items-center h-10">
+              <input id="isAvailableInLibrary" name="isAvailableInLibrary" type="checkbox"
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <label for="isAvailableInLibrary" class="ml-2 block text-sm text-gray-700">
+                Available in Library
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sale Information -->
+        <div class="border-t border-gray-200 pt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Sale Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="flex items-center">
+              <input id="isOnSale" name="isOnSale" type="checkbox"
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <label for="isOnSale" class="ml-2 block text-sm text-gray-700">
+                On Sale
+              </label>
+            </div>
+            
+            <div>
+              <label for="discountPercentage" class="block text-sm font-medium text-gray-700">Discount %</label>
+              <input type="number" id="discountPercentage" name="discountPercentage" min="0" max="100" step="1"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="saleStartDate" class="block text-sm font-medium text-gray-700">Sale Start Date</label>
+              <input type="date" id="saleStartDate" name="saleStartDate"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="saleEndDate" class="block text-sm font-medium text-gray-700">Sale End Date</label>
+              <input type="date" id="saleEndDate" name="saleEndDate"
+                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3 pt-6">
+          <a href="view-books.html" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            Cancel
+          </a>
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Success Notification -->
+  <div id="successNotification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Operation completed successfully!
+  </div>
+
+  <!-- Error Notification -->
+  <div id="errorNotification" class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Error performing operation!
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
+
+      if (!token || role !== 'Admin') {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('adminUsername').textContent = username;
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+
+      // Get book ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookId = urlParams.get('id');
+      
+      if (!bookId) {
+        window.location.href = 'view-books.html';
+        return;
+      }
+
+      // Form elements
+      const form = document.getElementById('editBookForm');
+      const successNotification = document.getElementById('successNotification');
+      const errorNotification = document.getElementById('errorNotification');
+
+      // Load book data
+      try {
+        const response = await fetch(`http://localhost:5036/api/books/${bookId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load book data');
+        }
+
+        const book = await response.json();
+
+        // Populate form fields
+        document.getElementById('name').value = book.name || '';
+        document.getElementById('author').value = book.author || '';
+        document.getElementById('isbn').value = book.isbn || '';
+        document.getElementById('description').value = book.description || '';
+        document.getElementById('publisher').value = book.publisher || '';
+        document.getElementById('language').value = book.language || '';
+        document.getElementById('genre').value = book.genre || '';
+        document.getElementById('publicationDate').value = book.publicationDate ? book.publicationDate.split('T')[0] : '';
+        document.getElementById('imageUrl').value = book.imageUrl || '';
+        document.getElementById('price').value = book.price || 0;
+        document.getElementById('stock').value = book.stock || 0;
+        document.getElementById('isAvailableInLibrary').checked = book.isAvailableInLibrary || false;
+        document.getElementById('isOnSale').checked = book.isOnSale || false;
+        document.getElementById('discountPercentage').value = book.discountPercentage || '';
+        document.getElementById('saleStartDate').value = book.saleStartDate ? book.saleStartDate.split('T')[0] : '';
+        document.getElementById('saleEndDate').value = book.saleEndDate ? book.saleEndDate.split('T')[0] : '';
+      } catch (error) {
+        console.error('Error loading book:', error);
+        showError(error.message);
+        setTimeout(() => {
+          window.location.href = 'view-books.html';
+        }, 2000);
+      }
+
+      // Form submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Create update payload with only changed fields
+        const formData = new FormData(form);
+        const updateData = {};
+        
+        formData.forEach((value, key) => {
+          // Skip empty fields (except booleans and numbers)
+          if (value !== '' && value !== null) {
+            // Convert number fields to numbers
+            if (['price', 'stock', 'discountPercentage'].includes(key)) {
+              updateData[key] = parseFloat(value);
+            } 
+            // Convert date fields to ISO strings
+            else if (['publicationDate', 'saleStartDate', 'saleEndDate'].includes(key)) {
+              if (value) updateData[key] = new Date(value).toISOString();
+            }
+            // Handle checkboxes
+            else if (['isAvailableInLibrary', 'isOnSale'].includes(key)) {
+              updateData[key] = document.getElementById(key).checked;
+            }
+            // All other fields
+            else {
+              updateData[key] = value;
+            }
+          }
+        });
+
+        try {
+          const response = await fetch(`http://localhost:5036/api/books/${bookId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updateData)
+          });
+
+          // First check if we got any response at all
+          if (!response.ok) {
+            // Try to parse error response
+            let errorMessage = 'Failed to update book';
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+              // If we can't parse JSON error, use status text
+              errorMessage = response.statusText || errorMessage;
+            }
+            throw new Error(errorMessage);
+          }
+
+          // Try to parse successful response
+          try {
+            const data = await response.json();
+            showSuccess('Book updated successfully');
+            setTimeout(() => {
+              window.location.href = 'view-books.html';
+            }, 1500);
+          } catch (e) {
+            // If we can't parse JSON but got 200 OK, still consider it success
+            showSuccess('Book updated successfully');
+            setTimeout(() => {
+              window.location.href = 'view-books.html';
+            }, 1500);
+          }
+        } catch (error) {
+          console.error('Error updating book:', error);
+          showError(error.message);
+        }
+      });
+
+      // Helper functions for notifications
+      function showSuccess(message) {
+        successNotification.textContent = message;
+        successNotification.classList.remove('hidden');
+        setTimeout(() => {
+          successNotification.classList.add('hidden');
+        }, 3000);
+      }
+
+      function showError(message) {
+        errorNotification.textContent = message;
+        errorNotification.classList.remove('hidden');
+        setTimeout(() => {
+          errorNotification.classList.add('hidden');
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>
