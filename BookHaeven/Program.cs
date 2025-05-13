@@ -14,10 +14,16 @@ builder.Services.AddControllers();
 
 
 
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default"));
 });
+
+
+
+
+
 
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -38,7 +44,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 //         });
 // });
 
-// Add CORS policy
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -65,6 +71,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
+
     });
 
 
@@ -73,7 +80,6 @@ var app = builder.Build();
 app.UseStaticFiles();
 
 // app.UseCors("AllowFrontend");
-
 
 app.UseHttpsRedirection();
 
@@ -85,3 +91,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

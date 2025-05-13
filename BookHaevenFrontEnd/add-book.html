@@ -381,12 +381,12 @@
           const formData = new FormData(bookForm);
 
           // Convert dates to UTC ISO strings
-          const publicationDate = new Date(formData.get("publicationDate")).toISOString();
-          const saleStartDate = formData.get("saleStartDate").toISOString()
-            ? new Date(formData.get("saleStartDate")).toISOString()
+          const publicationDate = new Date(formData.get("publicationDate"));
+          const saleStartDate = formData.get("saleStartDate")
+            ? new Date(formData.get("saleStartDate"))
             : null;
-          const saleEndDate = formData.get("saleEndDate").toISOString()
-            ? new Date(formData.get("saleEndDate")).toISOString()
+          const saleEndDate = formData.get("saleEndDate")
+            ? new Date(formData.get("saleEndDate"))
             : null;
 
           const bookData = {

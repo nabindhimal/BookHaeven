@@ -6,6 +6,7 @@ using BookHaeven.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BookHaeven.Controllers
 {
@@ -17,12 +18,14 @@ namespace BookHaeven.Controllers
         private readonly IOrderRepository _orderRepo;
         private readonly IEmailService _emailService;
         private readonly IUserRepository _userRepository;
+        private readonly IAnnouncementRepository _announcementRepo;
 
-        public OrderController(IOrderRepository orderRepo, IEmailService emailService, IUserRepository userRepository)
+        public OrderController(IOrderRepository orderRepo, IEmailService emailService, IUserRepository userRepository, IAnnouncementRepository announcementRepo)
         {
             _orderRepo = orderRepo;
             _emailService = emailService;
             _userRepository = userRepository;
+            _announcementRepo = announcementRepo;
         }
 
 
@@ -33,6 +36,7 @@ namespace BookHaeven.Controllers
             var orders = await _orderRepo.GetByUserIdAsync(userId);
             return Ok(orders.Select(o => o.ToDto()));
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrder(Guid id)
@@ -47,10 +51,10 @@ namespace BookHaeven.Controllers
             }
 
             // Users can only see their own orders
-            if (order.UserId != userId)
-            {
-                return Forbid();
-            }
+            // if (order.UserId != userId)
+            // {
+            //     return Forbid();
+            // }
 
             return Ok(order.ToDto());
         }
@@ -92,16 +96,57 @@ namespace BookHaeven.Controllers
         }
 
 
+        // [Authorize(Roles = "Admin")]
+        // [HttpPost("{id}/complete")]
+        // public async Task<IActionResult> CompleteOrder(Guid id)
+        // {
+        //     // var success = await _orderRepo.CompleteOrderAsync(id, GetUserId());
+        //     var success = await _orderRepo.CompleteOrderAsync(id);
+
+
+        //     return success ? NoContent() : NotFound();
+        //     // return Ok(new { message = "Order completed" });
+        // }
+
+
+
         [Authorize(Roles = "Admin")]
         [HttpPost("{id}/complete")]
         public async Task<IActionResult> CompleteOrder(Guid id)
         {
-            // var success = await _orderRepo.CompleteOrderAsync(id, GetUserId());
             var success = await _orderRepo.CompleteOrderAsync(id);
-            
+            if (!success) return NotFound();
 
-            return success ? NoContent() : NotFound();
-            // return Ok(new { message = "Order completed" });
+            var order = await _orderRepo.GetByIdAsync(id);
+            if (order == null) return NotFound();
+
+            // Get book titles from order items
+            var bookTitles = order.OrderItems
+                .Select(oi => oi.Book?.Name ?? "Unknown Book")
+                .Distinct()
+                .ToList();
+
+            // announcement message
+            var announcementMessage = bookTitles.Count switch
+            {
+                0 => $"Order {order.ClaimCode} completed!",
+                1 => $"Order {order.ClaimCode} completed for book: {bookTitles[0]}",
+                _ => $"Order {order.ClaimCode} completed for books: {string.Join(", ", bookTitles.Take(bookTitles.Count - 1))} and {bookTitles.Last()}"
+            };
+
+            // Create an announcement that will last for 5 minutes
+            var announcement = new Announcement
+            {
+                Id = Guid.NewGuid(),
+                Message = announcementMessage,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddMinutes(5),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _announcementRepo.CreateAsync(announcement);
+
+            return NoContent();
         }
 
         private Guid GetUserId() =>

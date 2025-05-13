@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">
+      <a href="admin.html">Admin Panel</a>
+    </h1>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="text-gray-700 font-medium"></span>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-semibold">Order Details</h2>
+      <a href="admin-orders.html" class="text-blue-600 hover:underline">← Back to Orders</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <!-- Order Summary -->
+      <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Order Number</h3>
+            <p id="orderId" class="text-lg font-mono"></p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Date</h3>
+            <p id="orderDate" class="text-lg"></p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Status</h3>
+            <p id="orderStatus" class="text-lg"></p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Customer</h3>
+            <p id="customerName" class="text-lg"></p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Claim Code</h3>
+            <p id="claimCode" class="text-lg font-mono"></p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Pickup Date</h3>
+            <p id="pickupDate" class="text-lg"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+        <div id="orderItems" class="space-y-4">
+          <!-- Items will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Order Totals -->
+      <div class="border-t border-gray-200 pt-6 mt-6">
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Subtotal:</span>
+          <span id="subtotal" class="font-medium"></span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">Discount:</span>
+          <span id="discount" class="font-medium text-green-600"></span>
+        </div>
+        <div class="flex justify-between text-lg font-bold mt-4">
+          <span>Total:</span>
+          <span id="total" class="text-blue-600"></span>
+        </div>
+      </div>
+
+      <!-- Admin Actions -->
+      <div id="adminActions" class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200 hidden">
+        <button id="completeOrderBtn" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+          Mark as Completed
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Success Notification -->
+  <div id="successNotification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Operation completed successfully!
+  </div>
+
+  <!-- Error Notification -->
+  <div id="errorNotification" class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    Error performing operation!
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('adminUsername').textContent = username;
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      });
+
+      // Get order ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+      
+      if (!orderId) {
+        window.location.href = 'admin-orders.html';
+        return;
+      }
+
+      // Elements
+      const successNotification = document.getElementById('successNotification');
+      const errorNotification = document.getElementById('errorNotification');
+      const completeOrderBtn = document.getElementById('completeOrderBtn');
+      const adminActions = document.getElementById('adminActions');
+
+      // Load order details
+      async function loadOrderDetails() {
+        try {
+          const response = await fetch(`http://localhost:5036/api/orders/${orderId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load order details');
+          }
+
+          const order = await response.json();
+          renderOrderDetails(order);
+
+          // Show admin actions if user is admin
+          if (role === 'Admin') {
+            adminActions.classList.remove('hidden');
+          }
+        } catch (error) {
+          console.error('Error loading order details:', error);
+          showError(error.message);
+        }
+      }
+
+      // Render order details
+      function renderOrderDetails(order) {
+        // Order info
+        document.getElementById('orderId').textContent = order.id.substring(0, 8);
+        document.getElementById('orderDate').textContent = new Date(order.orderDate).toLocaleString();
+        document.getElementById('orderStatus').textContent = order.status;
+        document.getElementById('customerName').textContent = order.user?.username || 'Unknown';
+        document.getElementById('claimCode').textContent = order.claimCode || 'N/A';
+        document.getElementById('pickupDate').textContent = order.pickupDate 
+          ? new Date(order.pickupDate).toLocaleString() 
+          : 'Not picked up yet';
+
+        // Order items
+        const orderItemsContainer = document.getElementById('orderItems');
+        orderItemsContainer.innerHTML = order.orderItems?.map(item => `
+          <div class="flex items-start border-b pb-4">
+            <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden mr-4">
+              ${item.bookImageUrl ? `
+                <img src="${item.bookImageUrl.startsWith('http') ? item.bookImageUrl : `http://localhost:5036${item.bookImageUrl}`}" 
+                     alt="${item.book?.name || 'Book'}" 
+                     class="w-full h-full object-cover">
+              ` : `
+                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+              `}
+            </div>
+            <div class="flex-1">
+              <h4 class="font-medium">${item.book?.name || 'Unknown Book'}</h4>
+              <p class="text-sm text-gray-600">${item.quantity} × $${item.unitPrice?.toFixed(2) || '0.00'}</p>
+            </div>
+            <div class="text-right">
+              $${(item.quantity * item.unitPrice)?.toFixed(2) || '0.00'}
+            </div>
+          </div>
+        `).join('') || '<p>No items found in this order</p>';
+
+        // Order totals
+        const subtotal = order.orderItems?.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) || 0;
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('discount').textContent = `-$${order.discountAmount?.toFixed(2) || '0.00'}`;
+        document.getElementById('total').textContent = `$${order.totalAmount?.toFixed(2) || '0.00'}`;
+      }
+
+      // Complete order
+      completeOrderBtn.addEventListener('click', async () => {
+        if (confirm('Mark this order as completed?')) {
+          try {
+            const response = await fetch(`http://localhost:5036/api/orders/${orderId}/complete`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(errorData.message || 'Failed to complete order');
+            }
+
+            showSuccess('Order marked as completed');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } catch (error) {
+            console.error('Error completing order:', error);
+            showError(error.message);
+          }
+        }
+      });
+
+      // Helper functions for notifications
+      function showSuccess(message) {
+        successNotification.textContent = message;
+        successNotification.classList.remove('hidden');
+        setTimeout(() => {
+          successNotification.classList.add('hidden');
+        }, 3000);
+      }
+
+      function showError(message) {
+        errorNotification.textContent = message;
+        errorNotification.classList.remove('hidden');
+        setTimeout(() => {
+          errorNotification.classList.add('hidden');
+        }, 3000);
+      }
+
+      // Initial load
+      loadOrderDetails();
+    });
+  </script>
+</body>
+</html>
