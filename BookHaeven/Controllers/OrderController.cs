@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using BookHaeven.Dtos.Order;
 using BookHaeven.Interface;
+using BookHaeven.Models;
 using BookHaeven.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ namespace BookHaeven.Controllers
         public async Task<ActionResult<OrderDto>> GetOrder(Guid id)
         {
             var userId = GetUserId();
-            
+
             var order = await _orderRepo.GetByIdAsync(id);
 
             if (order == null)
@@ -75,6 +76,14 @@ namespace BookHaeven.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("pending")]
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetPendingOrders()
+        {
+            var orders = await _orderRepo.GetPendingOrdersAsync();
+            return Ok(orders.Select(o => o.ToDto()));
+        }
+
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelOrder(Guid id)
         {
@@ -82,18 +91,22 @@ namespace BookHaeven.Controllers
             return success ? NoContent() : NotFound();
         }
 
-        // Staff endpoint to mark order as completed
-        [Authorize(Roles = "Staff")]
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("{id}/complete")]
         public async Task<IActionResult> CompleteOrder(Guid id)
         {
-            var success = await _orderRepo.CompleteOrderAsync(id, GetUserId());
+            // var success = await _orderRepo.CompleteOrderAsync(id, GetUserId());
+            var success = await _orderRepo.CompleteOrderAsync(id);
+            
+
             return success ? NoContent() : NotFound();
+            // return Ok(new { message = "Order completed" });
         }
 
         private Guid GetUserId() =>
             Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-        
+
     }
 }

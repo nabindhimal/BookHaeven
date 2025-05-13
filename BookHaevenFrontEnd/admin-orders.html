@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Process Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <!-- Admin Navbar -->
+    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-blue-600">
+        <a href="admin.html">Admin Panel</a>
+      </h1>
+      <div class="flex items-center space-x-4">
+        <span id="adminUsername" class="text-gray-700 font-medium"></span>
+        <button
+          id="logoutBtn"
+          class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">Pending Orders</h2>
+        <button
+          id="refreshBtn"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+        >
+          Refresh
+        </button>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Order #
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Customer
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Date
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Items
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Total
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Claim Code
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="ordersList" class="bg-white divide-y divide-gray-200">
+              <!-- Orders will be loaded here -->
+              <tr>
+                <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                  Loading orders...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Success Notification -->
+    <div
+      id="successNotification"
+      class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden"
+    >
+      Operation completed successfully!
+    </div>
+
+    <!-- Error Notification -->
+    <div
+      id="errorNotification"
+      class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden"
+    >
+      Error performing operation!
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+        const role = localStorage.getItem("role");
+
+        if (!token || role !== "Admin") {
+          window.location.href = "login.html";
+          return;
+        }
+
+        document.getElementById("adminUsername").textContent = username;
+
+        // Logout functionality
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+          localStorage.clear();
+          window.location.href = "login.html";
+        });
+
+        // Elements
+        const ordersList = document.getElementById("ordersList");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const successNotification = document.getElementById(
+          "successNotification"
+        );
+        const errorNotification = document.getElementById("errorNotification");
+
+        // Load orders
+        async function loadOrders() {
+          try {
+            ordersList.innerHTML =
+              '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading orders...</td></tr>';
+
+            const response = await fetch(
+              "http://localhost:5036/api/orders/pending",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to load orders");
+            }
+
+            const orders = await response.json();
+            renderOrders(orders);
+          } catch (error) {
+            console.error("Error loading orders:", error);
+            ordersList.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Error loading orders: ${error.message}</td></tr>`;
+            showError(error.message);
+          }
+        }
+
+        // Render orders in table
+        function renderOrders(orders) {
+          if (orders.length === 0) {
+            ordersList.innerHTML =
+              '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No pending orders found</td></tr>';
+            return;
+          }
+
+          ordersList.innerHTML = orders
+            .map((order) => {
+              const orderDate = new Date(order.orderDate);
+              const itemCount = order.orderItems?.length || 0;
+
+              return `
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">${order.id.substring(
+                  0,
+                  8
+                )}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${
+                  order.user?.username || "Unknown"
+                }</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${orderDate.toLocaleDateString()}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${itemCount} item${
+                itemCount !== 1 ? "s" : ""
+              }</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">$${
+                  order.totalAmount?.toFixed(2) || "0.00"
+                }</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-mono text-gray-900">${
+                  order.claimCode || "N/A"
+                }</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button data-id="${
+                  order.id
+                }" class="complete-btn px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2">
+                  Complete
+                </button>
+                <a href="order-details.html?id=${
+                  order.id
+                }" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  View
+                </a>
+              </td>
+            </tr>
+          `;
+            })
+            .join("");
+
+          // Add event listeners to complete buttons
+          document.querySelectorAll(".complete-btn").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+              const orderId = e.target.getAttribute("data-id");
+              if (
+                confirm(
+                  "Mark this order as completed? The customer has picked up their books."
+                )
+              ) {
+                await completeOrder(orderId);
+              }
+            });
+          });
+        }
+
+        // Complete order
+        //   async function completeOrder(orderId) {
+        //     try {
+        //       const response = await fetch(`http://localhost:5036/api/orders/${orderId}/complete`, {
+        //         method: 'POST',
+        //         headers: {
+        //           'Authorization': `Bearer ${token}`
+        //         }
+        //       });
+
+        //       if (!response.ok) {
+        //         throw new Error('Failed to complete order');
+        //       }
+
+        //       showSuccess('Order marked as completed');
+        //       await loadOrders();
+        //     } catch (error) {
+        //       console.error('Error completing order:', error);
+        //       showError(error.message);
+        //     }
+        //   }
+
+        async function completeOrder(orderId) {
+          try {
+            const response = await fetch(
+              `http://localhost:5036/api/orders/${orderId}/complete`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(errorData.message || "Failed to complete order");
+            }
+
+            showSuccess("Order marked as completed");
+            await loadOrders();
+          } catch (error) {
+            console.error("Error completing order:", error);
+            showError(error.message);
+          }
+        }
+
+        // Refresh button
+        refreshBtn.addEventListener("click", async () => {
+          await loadOrders();
+        });
+
+        // Helper functions for notifications
+        function showSuccess(message) {
+          successNotification.textContent = message;
+          successNotification.classList.remove("hidden");
+          setTimeout(() => {
+            successNotification.classList.add("hidden");
+          }, 3000);
+        }
+
+        function showError(message) {
+          errorNotification.textContent = message;
+          errorNotification.classList.remove("hidden");
+          setTimeout(() => {
+            errorNotification.classList.add("hidden");
+          }, 3000);
+        }
+
+        // Initial load
+        loadOrders();
+      });
+    </script>
+  </body>
+</html>

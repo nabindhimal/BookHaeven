@@ -116,16 +116,33 @@ public class OrderRepository : IOrderRepository
         return true;
     }
 
-    public async Task<bool> CompleteOrderAsync(Guid orderId, Guid userId)
+    // public async Task<bool> CompleteOrderAsync(Guid orderId, Guid userId)
+    // {
+    //     var order = await _context.Orders
+    //         .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+        
+    //     if (order == null || order.Status != OrderStatus.Pending)
+    //         return false;
+        
+    //     order.Status = OrderStatus.Completed;
+    //     order.PickupDate = DateTime.UtcNow;
+        
+    //     await _context.SaveChangesAsync();
+    //     return true;
+    // }
+
+
+    public async Task<bool> CompleteOrderAsync(Guid orderId)
     {
         var order = await _context.Orders
-            .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+            .FirstOrDefaultAsync(o => o.Id == orderId);
         
         if (order == null || order.Status != OrderStatus.Pending)
             return false;
         
         order.Status = OrderStatus.Completed;
         order.PickupDate = DateTime.UtcNow;
+        
         await _context.SaveChangesAsync();
         return true;
     }
@@ -144,7 +161,6 @@ public class OrderRepository : IOrderRepository
         return discount;
     }
 
-    // Additional helpful methods
     public async Task<bool> ExistsAsync(Guid orderId, Guid userId)
     {
         return await _context.Orders
@@ -161,4 +177,7 @@ public class OrderRepository : IOrderRepository
             .OrderBy(o => o.OrderDate)
             .ToListAsync();
     }
+
+
+    
 }

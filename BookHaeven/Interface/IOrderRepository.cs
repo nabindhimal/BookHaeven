@@ -10,5 +10,8 @@ public interface IOrderRepository
     Task<int> GetSuccessfulOrderCount(Guid userId);
     Task<Order> CreateFromCartAsync(Guid userId);
     Task<bool> CancelOrderAsync(Guid orderId, Guid userId);
-    Task<bool> CompleteOrderAsync(Guid orderId, Guid userId); // For staff to mark as completed
+    // Task<bool> CompleteOrderAsync(Guid orderId, Guid userId);
+    Task<bool> CompleteOrderAsync(Guid orderId);
+
+    Task<IEnumerable<Order>> GetPendingOrdersAsync();
 }
