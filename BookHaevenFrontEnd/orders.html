@@ -88,7 +88,7 @@
                                 const unitPrice = item.unitPrice || 0;
                                 const extendedPrice = (quantity * unitPrice).toFixed(2);
                                 
-                                
+                                // Use bookImageUrl from the item directly (stored at order creation)
                                 const imageUrl = item.bookImageUrl;
                                 
                                 return `
@@ -109,6 +109,12 @@
                                         <div class="flex-1">
                                             <h3 class="font-medium">${item.bookTitle || 'Unknown Book'}</h3>
                                             <p class="text-sm text-gray-600">${quantity} × $${unitPrice.toFixed(2)}</p>
+                                            ${order.status === 'Completed' ? `
+                                                <button onclick="reviewBook('${item.bookId}', '${order.id}')" 
+                                                        class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
+                                                    Review This Book
+                                                </button>
+                                            ` : ''}
                                         </div>
                                         <div class="text-right">
                                             $${extendedPrice}
@@ -156,6 +162,10 @@
             }
         }
 
+        function reviewBook(bookId, orderId) {
+            window.location.href = `book.html?id=${bookId}&review=true&orderId=${orderId}`;
+        }
+
         async function cancelOrder(orderId) {
             if (!confirm("Are you sure you want to cancel this order?")) return;
             
@@ -176,10 +186,10 @@
                 const orders = await fetchOrders(token);
                 displayOrders(orders);
                 
-                alert("Order cancelled successfully");
+                showToast("Order cancelled successfully");
             } catch (error) {
                 console.error("Failed to cancel order:", error);
-                alert("Failed to cancel order. Please try again.");
+                showToast("Failed to cancel order. Please try again.", "error");
             }
         }
 
@@ -192,6 +202,19 @@
                     </button>
                 </div>
             `;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
     </script>
 </body>

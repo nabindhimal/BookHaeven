@@ -11,160 +11,398 @@
     <div id="bookDetails" class="bg-white rounded shadow p-6">
       <p>Loading book details...</p>
     </div>
+
+    <!-- Reviews Section -->
+    <div class="mt-8 border-t pt-6">
+      <h2 class="text-2xl font-bold mb-4">Customer Reviews</h2>
+      
+      <!-- Review Form -->
+      <div id="reviewFormContainer" class="hidden bg-gray-50 p-4 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold mb-3">Write a Review</h3>
+        <form id="reviewForm">
+          <input type="hidden" id="reviewBookId">
+          <input type="hidden" id="reviewOrderId">
+          
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Rating</label>
+            <div class="flex items-center" id="ratingStars">
+              <svg class="w-8 h-8 cursor-pointer star-rating" data-rating="1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              <svg class="w-8 h-8 cursor-pointer star-rating" data-rating="2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              <svg class="w-8 h-8 cursor-pointer star-rating" data-rating="3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              <svg class="w-8 h-8 cursor-pointer star-rating" data-rating="4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              <svg class="w-8 h-8 cursor-pointer star-rating" data-rating="5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </div>
+            <input type="hidden" id="reviewRating" name="rating" required>
+          </div>
+          
+          <div class="mb-4">
+            <label for="reviewComment" class="block text-gray-700 mb-2">Review</label>
+            <textarea id="reviewComment" name="comment" rows="4" 
+                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Share your thoughts about this book..."></textarea>
+          </div>
+          
+          <button type="submit" 
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            Submit Review
+          </button>
+        </form>
+      </div>
+      
+      <!-- Reviews List -->
+      <div id="reviewsList" class="space-y-4">
+        <p>Loading reviews...</p>
+      </div>
+    </div>
   </div>
 
-  
+  <script>
+    function getBookId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let bookId = urlParams.get('id');
 
+      if (!bookId) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        bookId = hashParams.get('id');
+      }
 
-<script>
+      if (!bookId) {
+        const pathParts = window.location.pathname.split('/');
+        bookId = pathParts[pathParts.length - 1];
+        bookId = bookId.split('?')[0].split('#')[0];
+      }
 
+      if (!bookId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookId)) {
+        console.error('Invalid book ID format:', bookId);
+        return null;
+      }
 
-function getBookId() {
-  const urlParams = new URLSearchParams(window.location.search);
-  let bookId = urlParams.get('id');
-
-  if (!bookId) {
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    bookId = hashParams.get('id');
-  }
-
-  if (!bookId) {
-    const pathParts = window.location.pathname.split('/');
-    bookId = pathParts[pathParts.length - 1];
-    bookId = bookId.split('?')[0].split('#')[0];
-  }
-
-  if (!bookId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookId)) {
-    console.error('Invalid book ID format:', bookId);
-    return null;
-  }
-
-  console.log('Full URL:', window.location.href);
-  console.log('Extracted Book ID:', bookId);
-
-  return bookId;
-}
-
-
-
-  async function loadBookDetails() {
-    const bookId = getBookId();
-
-    if (!bookId) {
-      document.getElementById('bookDetails').innerHTML = `
-        <div class="text-red-600">
-          <p>Book ID is missing from URL.</p>
-          <p>Please access this page through the "View Details" button on a book listing.</p>
-          <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a>
-        </div>
-      `;
-      return;
+      return bookId;
     }
 
-    try {
-      const response = await fetch(`http://localhost:5036/api/books/${bookId}`);
-      if (!response.ok) throw new Error('Book not found (HTTP ' + response.status + ')');
-      const book = await response.json();
+    async function loadBookDetails() {
+      const bookId = getBookId();
 
-      document.getElementById('bookDetails').innerHTML = `
-        <h1 class="text-3xl font-bold mb-4">${book.name}</h1>
+      if (!bookId) {
+        document.getElementById('bookDetails').innerHTML = `
+          <div class="text-red-600">
+            <p>Book ID is missing from URL.</p>
+            <p>Please access this page through the "View Details" button on a book listing.</p>
+            <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a>
+          </div>
+        `;
+        return;
+      }
 
-        <div class="mb-6">
-          <img src="http://localhost:5036${book.imageUrl}" alt="Book Cover" class="w-48 h-auto rounded shadow">
-        </div>
+      try {
+        const response = await fetch(`http://localhost:5036/api/books/${bookId}`);
+        if (!response.ok) throw new Error('Book not found (HTTP ' + response.status + ')');
+        const book = await response.json();
 
-        <div class="grid grid-cols-1 gap-2 text-gray-700 mb-4">
-          <p><strong>Author:</strong> ${book.author}</p>
-          <p><strong>Publisher:</strong> ${book.publisher}</p>
-          <p><strong>ISBN:</strong> ${book.isbn}</p>
-          <p><strong>Language:</strong> ${book.language}</p>
-          <p><strong>Genre:</strong> ${book.genre}</p>
-          <p><strong>Publication Date:</strong> ${new Date(book.publicationDate).toLocaleDateString()}</p>
-          <p><strong>Available in Library:</strong> ${book.isAvailableInLibrary ? 'Yes' : 'No'}</p>
-          <p><strong>Stock:</strong> ${book.stock}</p>
-        </div>
+        document.getElementById('bookDetails').innerHTML = `
+          <h1 class="text-3xl font-bold mb-4">${book.name}</h1>
 
-        <div class="mb-4 text-lg">
-          <strong>Price:</strong>
-          ${book.isOnSale && book.discountedPrice 
-            ? `<span class="line-through text-red-500 mr-2">$${book.price.toFixed(2)}</span>
-               <span class="text-green-600 font-semibold">$${book.discountedPrice.toFixed(2)} (${book.discountPercentage}% OFF)</span>`
-            : `<span class="text-black font-semibold">$${book.price.toFixed(2)}</span>`
+          <div class="mb-6">
+            <img src="http://localhost:5036${book.imageUrl}" alt="Book Cover" class="w-48 h-auto rounded shadow">
+          </div>
+
+          <div class="grid grid-cols-1 gap-2 text-gray-700 mb-4">
+            <p><strong>Author:</strong> ${book.author}</p>
+            <p><strong>Publisher:</strong> ${book.publisher}</p>
+            <p><strong>ISBN:</strong> ${book.isbn}</p>
+            <p><strong>Language:</strong> ${book.language}</p>
+            <p><strong>Genre:</strong> ${book.genre}</p>
+            <p><strong>Publication Date:</strong> ${new Date(book.publicationDate).toLocaleDateString()}</p>
+            <p><strong>Available in Library:</strong> ${book.isAvailableInLibrary ? 'Yes' : 'No'}</p>
+            <p><strong>Stock:</strong> ${book.stock}</p>
+          </div>
+
+          <div class="mb-4 text-lg">
+            <strong>Price:</strong>
+            ${book.isOnSale && book.discountedPrice 
+              ? `<span class="line-through text-red-500 mr-2">$${book.price.toFixed(2)}</span>
+                 <span class="text-green-600 font-semibold">$${book.discountedPrice.toFixed(2)} (${book.discountPercentage}% OFF)</span>`
+              : `<span class="text-black font-semibold">$${book.price.toFixed(2)}</span>`
+            }
+          </div>
+
+          ${book.averageRating 
+            ? `<div class="mb-4 text-yellow-600">★ ${book.averageRating.toFixed(1)} / 5</div>` 
+            : ''
           }
-        </div>
 
-        ${book.averageRating 
-          ? `<div class="mb-4 text-yellow-600">★ ${book.averageRating.toFixed(1)} / 5</div>` 
-          : ''
+          <div class="mb-6">
+            <p class="text-gray-800">${book.description || '<em>No description provided.</em>'}</p>
+          </div>
+
+          <div class="mb-6 flex gap-4">
+            <button onclick="addToCart('${book.id}')" 
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              Add to Cart
+            </button>
+            <a href="index.html" class="text-blue-600 hover:underline px-4 py-2">← Back to catalog</a>
+          </div>
+        `;
+
+        // Set book ID for review form
+        document.getElementById('reviewBookId').value = bookId;
+
+        // Check URL for review mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const reviewMode = urlParams.get('review');
+        const orderId = urlParams.get('orderId');
+
+        if (reviewMode && orderId) {
+          document.getElementById('reviewOrderId').value = orderId;
+          document.getElementById('reviewFormContainer').classList.remove('hidden');
+          document.getElementById('reviewFormContainer').scrollIntoView({ behavior: 'smooth' });
+        } else {
+          // Check if user can review this book
+          const canReview = await checkIfCanReview(bookId);
+          if (canReview) {
+            document.getElementById('reviewFormContainer').classList.remove('hidden');
+          }
         }
 
-        <div class="mb-6">
-          <p class="text-gray-800">${book.description || '<em>No description provided.</em>'}</p>
-        </div>
+        // Load reviews
+        await loadReviews(bookId);
 
-        <div class="mb-6 flex gap-4">
-          <button onclick="addToCart('${book.id}')" 
-                  class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-            Add to Cart
-          </button>
-          <a href="index.html" class="text-blue-600 hover:underline px-4 py-2">← Back to catalog</a>
-        </div>
-      `;
-    } catch (error) {
-      document.getElementById('bookDetails').innerHTML = `
-        <div class="text-red-600">
-          <p>Error loading book: ${error.message}</p>
-          <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a>
-        </div>
-      `;
-    }
-  }
-
-  // Add to cart functionality
-  async function addToCart(bookId, quantity = 1) {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('Please log in to add items to cart');
+      } catch (error) {
+        document.getElementById('bookDetails').innerHTML = `
+          <div class="text-red-600">
+            <p>Error loading book: ${error.message}</p>
+            <a href="index.html" class="text-blue-600 hover:underline mt-2 inline-block">← Back to catalog</a>
+          </div>
+        `;
       }
+    }
 
-      const response = await fetch('http://localhost:5036/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ bookId, quantity })
+    async function checkIfCanReview(bookId) {
+      const token = localStorage.getItem('token');
+      if (!token) return false;
+
+      try {
+        const response = await fetch('http://localhost:5036/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) return false;
+
+        const orders = await response.json();
+        const completedOrders = orders.filter(o => o.status === 'Completed');
+        
+        for (const order of completedOrders) {
+          if (order.items.some(item => item.bookId === bookId)) {
+            // Check if already reviewed
+            const reviewed = await checkIfReviewed(bookId, order.id);
+            if (!reviewed) {
+              document.getElementById('reviewOrderId').value = order.id;
+              return true;
+            }
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error('Error checking review eligibility:', error);
+        return false;
+      }
+    }
+
+    async function checkIfReviewed(bookId, orderId) {
+      const token = localStorage.getItem('token');
+      if (!token) return true;
+
+      try {
+        const response = await fetch(`http://localhost:5036/api/reviews/order/${orderId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) return true;
+
+        const reviews = await response.json();
+        return reviews.some(r => r.bookId === bookId);
+      } catch (error) {
+        console.error('Error checking existing review:', error);
+        return true;
+      }
+    }
+
+    async function loadReviews(bookId) {
+      try {
+        const response = await fetch(`http://localhost:5036/api/reviews/book/${bookId}`);
+        if (!response.ok) throw new Error('Failed to load reviews');
+        
+        const data = await response.json();
+        const reviews = data.reviews || [];
+        
+        if (reviews.length === 0) {
+          document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500">No reviews yet.</p>';
+          return;
+        }
+        
+        document.getElementById('reviewsList').innerHTML = reviews.map(review => `
+          <div class="border-b pb-4">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-medium">${review.username}</h4>
+              <span class="text-sm text-gray-500">${new Date(review.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div class="flex items-center mb-2">
+              ${Array(5).fill().map((_, i) => `
+                <svg class="w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}" 
+                     viewBox="0 0 24 24">
+                  <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              `).join('')}
+            </div>
+            <p class="text-gray-700">${review.comment}</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('reviewsList').innerHTML = `
+          <p class="text-red-500">Error loading reviews: ${error.message}</p>
+        `;
+      }
+    }
+
+    // Star rating interaction
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize star ratings
+      document.querySelectorAll('.star-rating').forEach(star => {
+        star.addEventListener('click', function() {
+          const rating = parseInt(this.getAttribute('data-rating'));
+          document.getElementById('reviewRating').value = rating;
+          
+          // Update star display
+          document.querySelectorAll('.star-rating').forEach((s, i) => {
+            if (i < rating) {
+              s.classList.add('text-yellow-400', 'fill-current');
+              s.classList.remove('text-gray-300');
+            } else {
+              s.classList.remove('text-yellow-400', 'fill-current');
+              s.classList.add('text-gray-300');
+            }
+          });
+        });
       });
+      
+      // Review form submission
+      document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const bookId = document.getElementById('reviewBookId').value;
+        const orderId = document.getElementById('reviewOrderId').value;
+        const rating = document.getElementById('reviewRating').value;
+        const comment = document.getElementById('reviewComment').value;
+        
+        if (!rating || !comment) {
+          showToast('Please provide both a rating and review text', 'error');
+          return;
+        }
+        
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) throw new Error('Please log in to submit a review');
+          
+          const response = await fetch('http://localhost:5036/api/reviews', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              bookId,
+              orderId,
+              rating: parseInt(rating),
+              comment
+            })
+          });
+          
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Failed to submit review');
+          }
+          
+          const result = await response.json();
+          showToast('Review submitted successfully!');
+          
+          // Reset form and reload reviews
+          document.getElementById('reviewForm').reset();
+          document.querySelectorAll('.star-rating').forEach(star => {
+            star.classList.remove('text-yellow-400', 'fill-current');
+            star.classList.add('text-gray-300');
+          });
+          document.getElementById('reviewFormContainer').classList.add('hidden');
+          await loadReviews(bookId);
+          
+        } catch (error) {
+          console.error('Error submitting review:', error);
+          showToast(error.message, 'error');
+        }
+      });
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to cart');
+    // Add to cart functionality
+    async function addToCart(bookId, quantity = 1) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error('Please log in to add items to cart');
+        }
+
+        const response = await fetch('http://localhost:5036/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ bookId, quantity })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to add to cart');
+        }
+
+        const result = await response.json();
+        
+        showToast('Item added to cart successfully');
+        
+        return result;
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        showToast(error.message, 'error');
       }
-
-      const result = await response.json();
-      
-      showToast('Item added to cart successfully');
-      
-      return result;
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      showToast(error.message, 'error');
     }
-  }
 
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
-      type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
-  }
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      } text-white`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
 
-  document.addEventListener('DOMContentLoaded', loadBookDetails);
-</script>
+    // Initial load
+    loadBookDetails();
+  </script>
+</body>
+</html>
