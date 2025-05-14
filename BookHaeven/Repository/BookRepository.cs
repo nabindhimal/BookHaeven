@@ -179,4 +179,15 @@ public class BookRepository : IBookRepository
         await _context.SaveChangesAsync();
         return existingBook;
     }
+
+    public async Task UpdateAverageRatingAsync(Guid bookId, double? averageRating)
+    {
+        var book = await _context.Books.FindAsync(bookId);
+        if (book != null)
+        {
+            book.AverageRating = averageRating;
+            await _context.SaveChangesAsync();
+        }
+    }
+
 }

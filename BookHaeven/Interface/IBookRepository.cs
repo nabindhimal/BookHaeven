@@ -17,4 +17,5 @@ public interface IBookRepository
     Task<IEnumerable<Book>> SearchAndFilterAsync(BookQueryDto query);
 
     Task<Book> GetByIsbnAsync(string isbn);
+    Task UpdateAverageRatingAsync(Guid bookId, double? averageRating);
 }

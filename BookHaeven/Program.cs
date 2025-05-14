@@ -24,6 +24,7 @@ builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 // Adding policy for allowing frontend connection
 builder.Services.AddCors(options =>
