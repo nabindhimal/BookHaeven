@@ -160,7 +160,7 @@
           }
         }
 
-        // Render orders in table
+    
         function renderOrders(orders) {
           if (orders.length === 0) {
             ordersList.innerHTML =
@@ -171,53 +171,53 @@
           ordersList.innerHTML = orders
             .map((order) => {
               const orderDate = new Date(order.orderDate);
-              const itemCount = order.orderItems?.length || 0;
+              const itemCount = order.items?.length || 0;
 
               return `
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">${order.id.substring(
-                  0,
-                  8
-                )}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${
-                  order.user?.username || "Unknown"
-                }</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${orderDate.toLocaleDateString()}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${itemCount} item${
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">${order.id.substring(
+                      0,
+                      8
+                    )}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${
+                      order.username || "Unknown"
+                    }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${orderDate.toLocaleDateString()}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${itemCount} item${
                 itemCount !== 1 ? "s" : ""
               }</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">$${
-                  order.totalAmount?.toFixed(2) || "0.00"
-                }</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-mono text-gray-900">${
-                  order.claimCode || "N/A"
-                }</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button data-id="${
-                  order.id
-                }" class="complete-btn px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2">
-                  Complete
-                </button>
-                <a href="order-details.html?id=${
-                  order.id
-                }" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                  View
-                </a>
-              </td>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">$${
+                      order.totalAmount?.toFixed(2) || "0.00"
+                    }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-mono text-gray-900">${
+                      order.claimCode || "N/A"
+                    }</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button data-id="${
+                      order.id
+                    }" class="complete-btn px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2">
+                        Complete
+                    </button>
+                    <a href="order-details.html?id=${
+                      order.id
+                    }" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        View
+                    </a>
+                </td>
             </tr>
-          `;
+        `;
             })
             .join("");
 
@@ -236,27 +236,6 @@
           });
         }
 
-        // Complete order
-        //   async function completeOrder(orderId) {
-        //     try {
-        //       const response = await fetch(`http://localhost:5036/api/orders/${orderId}/complete`, {
-        //         method: 'POST',
-        //         headers: {
-        //           'Authorization': `Bearer ${token}`
-        //         }
-        //       });
-
-        //       if (!response.ok) {
-        //         throw new Error('Failed to complete order');
-        //       }
-
-        //       showSuccess('Order marked as completed');
-        //       await loadOrders();
-        //     } catch (error) {
-        //       console.error('Error completing order:', error);
-        //       showError(error.message);
-        //     }
-        //   }
 
         async function completeOrder(orderId) {
           try {

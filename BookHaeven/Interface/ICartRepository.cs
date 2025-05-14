@@ -11,4 +11,5 @@ public interface ICartRepository
     Task<bool> RemoveAsync(Guid cartItemId);
     Task ClearCartAsync(Guid userId);
     Task<int> GetItemCountAsync(Guid userId);
+    Task UpdateAsync(Cart cartItem);
 }

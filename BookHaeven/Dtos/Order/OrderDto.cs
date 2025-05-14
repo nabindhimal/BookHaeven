@@ -15,6 +15,11 @@ public class OrderDto
     public decimal TotalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public List<OrderItemDto> Items { get; set; } = new();
+
+
+    public Guid UserId { get; set; }
+    public string Username { get; set; }
+    public string Email { get; set; }
 }
 
 public class OrderItemDto
@@ -30,6 +35,25 @@ public class OrderItemDto
 // Extension method for mapping
 public static class OrderMappers
 {
+    // public static OrderDto ToDto(this Order order) => new()
+    // {
+    //     Id = order.Id,
+    //     ClaimCode = order.ClaimCode,
+    //     OrderDate = order.OrderDate,
+    //     PickupDate = order.PickupDate,
+    //     Status = order.Status.ToString(),
+    //     TotalAmount = order.TotalAmount,
+    //     DiscountAmount = order.DiscountAmount,
+    //     Items = order.OrderItems.Select(i => new OrderItemDto
+    //     {
+    //         BookId = i.BookId,
+    //         BookTitle = i.Book?.Name ?? "Unknown",
+    //         Quantity = i.Quantity,
+    //         UnitPrice = i.UnitPrice,
+    //         BookImageUrl = i.BookImageUrl ?? i.Book?.ImageUrl
+    //     }).ToList()
+    // };
+
     public static OrderDto ToDto(this Order order) => new()
     {
         Id = order.Id,
@@ -39,6 +63,9 @@ public static class OrderMappers
         Status = order.Status.ToString(),
         TotalAmount = order.TotalAmount,
         DiscountAmount = order.DiscountAmount,
+        UserId = order.UserId,
+        Username = order.User?.Username ?? "Unknown",
+        Email = order.User?.Email ?? string.Empty,
         Items = order.OrderItems.Select(i => new OrderItemDto
         {
             BookId = i.BookId,
@@ -46,7 +73,6 @@ public static class OrderMappers
             Quantity = i.Quantity,
             UnitPrice = i.UnitPrice,
             BookImageUrl = i.BookImageUrl ?? i.Book?.ImageUrl
-            // BookImageUrl = i.BookImageUrl
         }).ToList()
     };
 }

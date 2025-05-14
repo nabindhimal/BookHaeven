@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Jknad86BzErzMOrw1nO8wvJ7wiDS5OJPbVOcJ1Ea/Go=",
+  "Hash": "FdRDPCy6ZQO442hbc+dbAy2j2erPoYhADbszQiA1W0s=",
   "Source": "BookHaeven",
   "BasePath": "_content/BookHaeven",
   "Mode": "Default",
@@ -72,6 +72,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/images/3.webp"
+    },
+    {
+      "Identity": "/home/net/Documents/C/BookHaeven/wwwroot/images/chemist.webp",
+      "SourceId": "BookHaeven",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/net/Documents/C/BookHaeven/wwwroot/",
+      "BasePath": "_content/BookHaeven",
+      "RelativePath": "images/chemist.webp",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/chemist.webp"
     },
     {
       "Identity": "/home/net/Documents/C/BookHaeven/wwwroot/images/lord.jpeg",

@@ -48,6 +48,7 @@
           <div>
             <h3 class="text-sm font-medium text-gray-500">Customer</h3>
             <p id="customerName" class="text-lg"></p>
+            <p id="customerEmail" class="text-sm text-gray-600"></p>
           </div>
           <div>
             <h3 class="text-sm font-medium text-gray-500">Claim Code</h3>
@@ -76,11 +77,11 @@
         </div>
         <div class="flex justify-between mb-2">
           <span class="text-gray-600">Discount:</span>
-          <span id="discount" class="font-medium text-green-600"></span>
+          <span id="discount" class="font-medium text-green-600">-$0.00</span>
         </div>
         <div class="flex justify-between text-lg font-bold mt-4">
           <span>Total:</span>
-          <span id="total" class="text-blue-600"></span>
+          <span id="total" class="text-blue-600">$0.00</span>
         </div>
       </div>
 
@@ -151,6 +152,7 @@
           }
 
           const order = await response.json();
+          console.log('Order data:', order); // Debugging
           renderOrderDetails(order);
 
           // Show admin actions if user is admin
@@ -169,41 +171,55 @@
         document.getElementById('orderId').textContent = order.id.substring(0, 8);
         document.getElementById('orderDate').textContent = new Date(order.orderDate).toLocaleString();
         document.getElementById('orderStatus').textContent = order.status;
-        document.getElementById('customerName').textContent = order.user?.username || 'Unknown';
+        
+        // Updated customer information section
+        document.getElementById('customerName').textContent = order.username || order.user?.username || 'Unknown';
+        document.getElementById('customerEmail').textContent = order.email || order.user?.email || '';
+        
         document.getElementById('claimCode').textContent = order.claimCode || 'N/A';
         document.getElementById('pickupDate').textContent = order.pickupDate 
           ? new Date(order.pickupDate).toLocaleString() 
           : 'Not picked up yet';
 
-        // Order items
+        // Order items - using order.items instead of order.orderItems
         const orderItemsContainer = document.getElementById('orderItems');
-        orderItemsContainer.innerHTML = order.orderItems?.map(item => `
-          <div class="flex items-start border-b pb-4">
-            <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden mr-4">
-              ${item.bookImageUrl ? `
-                <img src="${item.bookImageUrl.startsWith('http') ? item.bookImageUrl : `http://localhost:5036${item.bookImageUrl}`}" 
-                     alt="${item.book?.name || 'Book'}" 
-                     class="w-full h-full object-cover">
-              ` : `
-                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                </div>
-              `}
+        const items = order.items || order.orderItems || [];
+        
+        if (items.length === 0) {
+          orderItemsContainer.innerHTML = `
+            <div class="text-center py-6">
+              <p class="text-gray-500">No items found in this order</p>
             </div>
-            <div class="flex-1">
-              <h4 class="font-medium">${item.book?.name || 'Unknown Book'}</h4>
-              <p class="text-sm text-gray-600">${item.quantity} × $${item.unitPrice?.toFixed(2) || '0.00'}</p>
+          `;
+        } else {
+          orderItemsContainer.innerHTML = items.map(item => `
+            <div class="flex items-start border-b pb-4">
+              <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden mr-4 flex items-center justify-center">
+                ${item.bookImageUrl ? `
+                  <img src="${item.bookImageUrl.startsWith('http') ? item.bookImageUrl : `http://localhost:5036${item.bookImageUrl}`}" 
+                       alt="${item.bookTitle || item.book?.name || 'Book'}" 
+                       class="w-full h-full object-cover">
+                ` : `
+                  <div class="w-full h-full flex items-center justify-center text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                `}
+              </div>
+              <div class="flex-1">
+                <h4 class="font-medium">${item.bookTitle || item.book?.name || 'Unknown Book'}</h4>
+                <p class="text-sm text-gray-600">${item.quantity} × $${item.unitPrice?.toFixed(2) || '0.00'}</p>
+              </div>
+              <div class="text-right">
+                $${(item.quantity * item.unitPrice)?.toFixed(2) || '0.00'}
+              </div>
             </div>
-            <div class="text-right">
-              $${(item.quantity * item.unitPrice)?.toFixed(2) || '0.00'}
-            </div>
-          </div>
-        `).join('') || '<p>No items found in this order</p>';
+          `).join('');
+        }
 
         // Order totals
-        const subtotal = order.orderItems?.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) || 0;
+        const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) || 0;
         document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
         document.getElementById('discount').textContent = `-$${order.discountAmount?.toFixed(2) || '0.00'}`;
         document.getElementById('total').textContent = `$${order.totalAmount?.toFixed(2) || '0.00'}`;

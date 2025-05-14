@@ -8,38 +8,32 @@ public class Book
     [Key]
     public Guid Id { get; set; }
 
-
     // Basic book info fields
-
     [Required(ErrorMessage = "Book name is required.")]
-    [StringLength(100, ErrorMessage="Book name cannot exceed 100 characters.")]
+    [StringLength(100, ErrorMessage = "Book name cannot exceed 100 characters.")]
     public required string Name { get; set; }
-
 
     [StringLength(20)]
     [Required(ErrorMessage = "ISBN is required.")]
     public required string ISBN { get; set; }
-
     public string Description { get; set; } = "";
 
     [Required(ErrorMessage = "Book author is required.")]
-    [StringLength(50, ErrorMessage="Author name cannot exceed 50 characters.")]
+    [StringLength(50, ErrorMessage = "Author name cannot exceed 50 characters.")]
     public required string Author { get; set; }
 
-    [Required(ErrorMessage ="Book publisher name is required.")]
-    [StringLength(50, ErrorMessage="Publisher name cannot exceed 50 characters.")]
+    [Required(ErrorMessage = "Book publisher name is required.")]
+    [StringLength(50, ErrorMessage = "Publisher name cannot exceed 50 characters.")]
     public required string Publisher { get; set; }
 
-    [Required(ErrorMessage ="Book language is required.")]
-    [StringLength(50, ErrorMessage="Language cannot exceed 50 characters.")]
+    [Required(ErrorMessage = "Book language is required.")]
+    [StringLength(50, ErrorMessage = "Language cannot exceed 50 characters.")]
     public required string Language { get; set; }
 
-
-    [Required(ErrorMessage ="Book genre is required.")]
-    [StringLength(50, ErrorMessage="Genre exceed 50 characters.")]
+    [Required(ErrorMessage = "Book genre is required.")]
+    [StringLength(50, ErrorMessage = "Genre exceed 50 characters.")]
     public required string Genre { get; set; }
-
-    public DateTime PublicationDate { get; set; } 
+    public DateTime PublicationDate { get; set; }
 
     [Range(0, 999999)]
     public decimal Price { get; set; }
@@ -64,19 +58,11 @@ public class Book
 
     public double? AverageRating { get; set; }
 
-
     public string? ImageUrl { get; set; }
-
-
-
-
-
-    
-    
     public ICollection<Review>? Reviews { get; set; }
     public ICollection<Bookmark>? Bookmarks { get; set; }
-    
 
-    
+
+
 
 }

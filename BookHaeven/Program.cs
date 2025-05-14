@@ -8,23 +8,15 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 builder.Services.AddControllers();
 
-
-
-
+// Getting connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default"));
 });
 
-
-
-
-
-
+// Binding interface with repository for repository pattern
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
@@ -33,18 +25,7 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowFrontend",
-//         policy =>
-//         {
-//             policy.WithOrigins("http://localhost:3000", "https://localhost:3000") 
-//                   .AllowAnyHeader()
-//                   .AllowAnyMethod();
-//         });
-// });
-
-
+// Adding policy for allowing frontend connection
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -56,6 +37,7 @@ builder.Services.AddCors(options =>
 });
 
 
+// For authentication with JWT
 var key = Convert.FromBase64String(builder.Configuration["Jwt:Key"] ?? "");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -79,13 +61,12 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
-// app.UseCors("AllowFrontend");
-
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll"); 
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

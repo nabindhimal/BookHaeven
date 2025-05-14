@@ -10,6 +10,14 @@
 <body class="bg-gray-50">
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-6">Your Cart</h1>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 hidden">
+      <div class="bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+        <span id="toast-message"></span>
+      </div>
+    </div>
+    
     <div id="cart-items" class="space-y-4">
       <!-- Cart items will be loaded here -->
     </div>
@@ -32,6 +40,23 @@
     document.addEventListener("DOMContentLoaded", () => {
       loadCart();
     });
+
+    // Toast notification function
+    function showToast(message, isError = true) {
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toast-message");
+      
+      toast.className = isError 
+        ? "fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg"
+        : "fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg";
+      
+      toastMessage.textContent = message;
+      toast.classList.remove("hidden");
+      
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 5000);
+    }
 
     async function loadCart() {
       const token = localStorage.getItem("token");
@@ -67,7 +92,8 @@
         cartItemsContainer.innerHTML = cartItems.map(item => `
           <div class="cart-item flex border-b pb-4" data-id="${item.id}">
             <div class="w-24 h-24 bg-gray-200 rounded overflow-hidden">
-              <img src="http://localhost:5036${item.bookImageUrl}" alt="${item.bookTitle}" class="w-full h-full object-cover">
+              <img src="${item.bookImageUrl.startsWith('http') ? item.bookImageUrl : `http://localhost:5036${item.bookImageUrl}`}" 
+                   alt="${item.bookTitle}" class="w-full h-full object-cover">
             </div>
             <div class="ml-4 flex-1">
               <h3 class="font-semibold">${item.bookTitle}</h3>
@@ -80,10 +106,10 @@
                 <span class="text-gray-600">$${item.originalPrice.toFixed(2)}</span>
               `}
               <div class="flex items-center mt-2">
-                <button class="quantity-btn" data-action="decrease">-</button>
+                <button class="quantity-btn px-2 border rounded" data-action="decrease">-</button>
                 <span class="quantity mx-2">${item.quantity}</span>
-                <button class="quantity-btn" data-action="increase">+</button>
-                <span class="text-sm text-gray-500 ml-2">${item.availableStock} available</span>
+                <button class="quantity-btn px-2 border rounded" data-action="increase">+</button>
+                <span class="text-sm text-gray-500 ml-2 available-stock">${item.availableStock} available</span>
                 <button class="remove-btn ml-auto text-red-500 hover:text-red-700">
                   Remove
                 </button>
@@ -97,88 +123,104 @@
         document.getElementById("cart-total").textContent = `$${total.toFixed(2)}`;
 
         // Add event listeners
-        document.querySelectorAll(".quantity-btn").forEach(btn => {
-          btn.addEventListener("click", updateQuantity);
-        });
-
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-          btn.addEventListener("click", removeItem);
-        });
+        addEventListeners();
 
       } catch (error) {
         console.error("Error loading cart:", error);
-        alert("Failed to load cart. Please try again.");
+        showToast("Failed to load cart. Please try again.");
       }
     }
 
-    async function updateQuantity(e) {
-      const btn = e.currentTarget;
-      const action = btn.getAttribute("data-action");
-      const itemElement = btn.closest(".cart-item");
-      const itemId = itemElement.getAttribute("data-id");
-      const quantityElement = itemElement.querySelector(".quantity");
-      const availableStock = parseInt(itemElement.querySelector(".available-stock").textContent);
-      let quantity = parseInt(quantityElement.textContent);
+    function addEventListeners() {
+      // Quantity buttons
+      document.querySelectorAll(".quantity-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const action = e.target.getAttribute("data-action");
+          const itemElement = e.target.closest(".cart-item");
+          const itemId = itemElement.getAttribute("data-id");
+          const quantityElement = itemElement.querySelector(".quantity");
+          const availableStock = parseInt(itemElement.querySelector(".available-stock").textContent.split(" ")[0]);
+          let quantity = parseInt(quantityElement.textContent);
 
-      if (action === "increase") {
-        if (quantity >= availableStock) {
-          alert("Cannot add more than available stock");
-          return;
-        }
-        quantity += 1;
-      } else if (action === "decrease" && quantity > 1) {
-        quantity -= 1;
-      }
+          if (action === "increase") {
+            if (quantity >= availableStock) {
+              showToast(`Cannot add more than available stock (${availableStock})`);
+              return;
+            }
+            quantity += 1;
+          } else if (action === "decrease" && quantity > 1) {
+            quantity -= 1;
+          }
 
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ quantity })
-        });
+          try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({ quantity })
+            });
 
-        if (!response.ok) throw new Error("Failed to update quantity");
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.message || "Failed to update quantity");
+            }
 
-        quantityElement.textContent = quantity;
-        loadCart(); // Refresh cart to update total
-      } catch (error) {
-        console.error("Error updating quantity:", error);
-        alert("Failed to update quantity. Please try again.");
-      }
-    }
-
-    async function removeItem(e) {
-      const itemElement = e.currentTarget.closest(".cart-item");
-      const itemId = itemElement.getAttribute("data-id");
-
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
-          method: "DELETE",
-          headers: {
-            "Authorization": `Bearer ${token}`
+            // Update UI immediately for better UX
+            quantityElement.textContent = quantity;
+            
+            // Refresh cart to update total and stock info
+            await loadCart();
+            showToast("Quantity updated successfully", false);
+            
+          } catch (error) {
+            console.error("Error updating quantity:", error);
+            showToast(`Failed to update quantity: ${error.message}`);
           }
         });
+      });
 
-        if (!response.ok) throw new Error("Failed to remove item");
+      // Remove buttons
+      document.querySelectorAll(".remove-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const itemElement = e.target.closest(".cart-item");
+          const itemId = itemElement.getAttribute("data-id");
 
-        itemElement.remove();
-        loadCart(); // Refresh cart to check if empty
-      } catch (error) {
-        console.error("Error removing item:", error);
-        alert("Failed to remove item. Please try again.");
-      }
+          try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:5036/api/cart/${itemId}`, {
+              method: "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              }
+            });
+
+            if (!response.ok) throw new Error("Failed to remove item");
+
+            // Remove item from UI immediately
+            itemElement.remove();
+            
+            // Check if cart is now empty
+            const cartItems = document.querySelectorAll(".cart-item");
+            if (cartItems.length === 0) {
+              document.getElementById("empty-cart").classList.remove("hidden");
+              document.getElementById("cart-summary").classList.add("hidden");
+            }
+            
+            // Refresh cart to update total
+            await loadCart();
+            showToast("Item removed from cart", false);
+            
+          } catch (error) {
+            console.error("Error removing item:", error);
+            showToast("Failed to remove item. Please try again.");
+          }
+        });
+      });
     }
 
-    <!-- document.getElementById("checkout-btn").addEventListener("click", () => { -->
-    <!--   alert("Checkout functionality will be implemented soon!"); -->
-    <!-- }); -->
-
-    
     document.getElementById("checkout-btn").addEventListener("click", async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -201,18 +243,13 @@
         }
 
         const order = await response.json();
-        
-        // Redirect to order confirmation page with order ID
         window.location.href = `/order-confirmation.html?id=${order.id}`;
         
       } catch (error) {
         console.error("Checkout error:", error);
-        alert(`Checkout failed: ${error.message}`);
+        showToast(`Checkout failed: ${error.message}`);
       }
     });
-
-
-
   </script>
 </body>
 </html>

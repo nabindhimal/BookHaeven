@@ -46,17 +46,6 @@ public class BookRepository : IBookRepository
         return await _context.Books.FirstOrDefaultAsync(b => b.Name.ToLower() == title.ToLower());
     }
 
-    // public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize)
-    // {
-    //     return await _context.Books
-    //         .OrderBy(b => b.Name)
-    //         .Skip((pageNumber - 1) * pageSize)
-    //         .Take(pageSize)
-    //         .Select(b => b.ToViewBookDto())
-    //         .ToListAsync();
-    // }
-
-
     public async Task<List<ViewBookDto>> GetPaginatedAsync(int pageNumber, int pageSize, Guid? userId = null)
     {
         var query = _context.Books.AsQueryable();

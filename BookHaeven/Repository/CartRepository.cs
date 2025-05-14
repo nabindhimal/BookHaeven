@@ -32,13 +32,17 @@ public class CartRepository : ICartRepository
 
     public async Task<Cart> AddOrUpdateAsync(Guid userId, Guid bookId, int quantity)
     {
-        // Get the book first to check stock
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be positive");
+
+        // Get the book with tracking to potentially update it later
         var book = await _context.Books.FindAsync(bookId);
         if (book == null)
             throw new ArgumentException("Book not found");
 
+        // Check available stock
         if (book.Stock < quantity)
-            throw new InvalidOperationException($"Not enough stock. Only {book.Stock} available");
+            throw new InvalidOperationException($"Not enough stock for {book.Name}. Available: {book.Stock}, Requested: {quantity}");
 
         var existingItem = await _context.Carts
             .FirstOrDefaultAsync(c => c.UserId == userId && c.BookId == bookId);
@@ -46,8 +50,11 @@ public class CartRepository : ICartRepository
         if (existingItem != null)
         {
             var newQuantity = existingItem.Quantity + quantity;
+
+            // Recheck stock with new quantity
             if (book.Stock < newQuantity)
-                throw new InvalidOperationException($"Not enough stock. Only {book.Stock} available");
+                throw new InvalidOperationException(
+                    $"Not enough stock for {book.Name}. Available: {book.Stock}, Requested: {newQuantity}");
 
             existingItem.Quantity = newQuantity;
             existingItem.UpdatedAt = DateTime.UtcNow;
@@ -67,6 +74,13 @@ public class CartRepository : ICartRepository
         return existingItem;
     }
 
+
+
+    public async Task UpdateAsync(Cart cartItem)
+    {
+        _context.Carts.Update(cartItem);
+        await _context.SaveChangesAsync();
+    }
     public async Task<bool> RemoveAsync(Guid cartItemId)
     {
         var cartItem = await _context.Carts.FindAsync(cartItemId);

@@ -50,12 +50,6 @@ namespace BookHaeven.Controllers
                 return NotFound();
             }
 
-            // Users can only see their own orders
-            // if (order.UserId != userId)
-            // {
-            //     return Forbid();
-            // }
-
             return Ok(order.ToDto());
         }
 
@@ -94,20 +88,6 @@ namespace BookHaeven.Controllers
             var success = await _orderRepo.CancelOrderAsync(id, GetUserId());
             return success ? NoContent() : NotFound();
         }
-
-
-        // [Authorize(Roles = "Admin")]
-        // [HttpPost("{id}/complete")]
-        // public async Task<IActionResult> CompleteOrder(Guid id)
-        // {
-        //     // var success = await _orderRepo.CompleteOrderAsync(id, GetUserId());
-        //     var success = await _orderRepo.CompleteOrderAsync(id);
-
-
-        //     return success ? NoContent() : NotFound();
-        //     // return Ok(new { message = "Order completed" });
-        // }
-
 
 
         [Authorize(Roles = "Admin")]

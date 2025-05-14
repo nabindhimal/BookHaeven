@@ -28,28 +28,22 @@ namespace BookHaeven.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // return BadRequest(ModelState);
                 return BadRequest(new { message = "Invalid input", errors = ModelState });
             }
 
             if (await _repo.GetByEmailAsync(registerDto.Email) != null)
             {
                 return BadRequest(new { message = "Email already taken." });
-
-                // return BadRequest("Email already taken.");
             }
 
             if (await _repo.GetByUsernameAsync(registerDto.Username) != null)
             {
                 return BadRequest(new { message = "Username already taken." });
-
-                // return BadRequest("Username already taken.");
             }
 
             var newUser = registerDto.ToUserFromRegisterDto();
             await _repo.AddAsync(newUser);
 
-            // return Ok("User registered successfully.");
             return Ok(new { message = "User registered successfully." });
 
         }

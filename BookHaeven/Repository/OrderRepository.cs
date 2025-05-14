@@ -21,10 +21,10 @@ public class OrderRepository : IOrderRepository
     public async Task<Order> CreateFromCartAsync(Guid userId)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         try
         {
-            // Get cart items
+            // Get cart items with book information
             var cartItems = await _context.Carts
                 .Include(c => c.Book)
                 .Where(c => c.UserId == userId)
@@ -32,6 +32,16 @@ public class OrderRepository : IOrderRepository
 
             if (!cartItems.Any())
                 throw new InvalidOperationException("Cart is empty");
+
+            // Verify stock availability before proceeding
+            foreach (var cartItem in cartItems)
+            {
+                if (cartItem.Book.Stock < cartItem.Quantity)
+                {
+                    throw new InvalidOperationException(
+                        $"Not enough stock for {cartItem.Book.Name}. Available: {cartItem.Book.Stock}, Requested: {cartItem.Quantity}");
+                }
+            }
 
             // Calculate discounts
             var discount = await CalculateDiscountAsync(userId, cartItems.Count);
@@ -43,9 +53,13 @@ public class OrderRepository : IOrderRepository
                 Status = OrderStatus.Pending
             };
 
-            // Convert cart items to order items
+            // Convert cart items to order items and decrease stock
             foreach (var cartItem in cartItems)
             {
+                // Decrease book stock
+                cartItem.Book.Stock -= cartItem.Quantity;
+                _context.Books.Update(cartItem.Book);
+
                 order.OrderItems.Add(new OrderItem
                 {
                     BookId = cartItem.BookId,
@@ -62,10 +76,10 @@ public class OrderRepository : IOrderRepository
 
             // Save order
             _context.Orders.Add(order);
-            
+
             // Clear cart
             _context.Carts.RemoveRange(cartItems);
-            
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
@@ -105,44 +119,53 @@ public class OrderRepository : IOrderRepository
 
     public async Task<bool> CancelOrderAsync(Guid orderId, Guid userId)
     {
-        var order = await _context.Orders
-            .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
-        
-        if (order == null || order.Status != OrderStatus.Pending)
-            return false;
-        
-        order.Status = OrderStatus.Cancelled;
-        await _context.SaveChangesAsync();
-        return true;
-    }
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-    // public async Task<bool> CompleteOrderAsync(Guid orderId, Guid userId)
-    // {
-    //     var order = await _context.Orders
-    //         .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
-        
-    //     if (order == null || order.Status != OrderStatus.Pending)
-    //         return false;
-        
-    //     order.Status = OrderStatus.Completed;
-    //     order.PickupDate = DateTime.UtcNow;
-        
-    //     await _context.SaveChangesAsync();
-    //     return true;
-    // }
+        try
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Book)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+
+            if (order == null || order.Status != OrderStatus.Pending)
+                return false;
+
+            // Restore stock for each item
+            foreach (var item in order.OrderItems)
+            {
+                if (item.Book != null)
+                {
+                    item.Book.Stock += item.Quantity;
+                    _context.Books.Update(item.Book);
+                }
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
 
     public async Task<bool> CompleteOrderAsync(Guid orderId)
     {
         var order = await _context.Orders
             .FirstOrDefaultAsync(o => o.Id == orderId);
-        
+
         if (order == null || order.Status != OrderStatus.Pending)
             return false;
-        
+
         order.Status = OrderStatus.Completed;
         order.PickupDate = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -150,14 +173,14 @@ public class OrderRepository : IOrderRepository
     private async Task<decimal> CalculateDiscountAsync(Guid userId, int itemCount)
     {
         decimal discount = 0;
-        
+
         // 5% discount for 5+ items
         if (itemCount >= 5) discount += 0.05m;
-        
+
         // Additional 10% for loyal customers (10+ orders)
         var successfulOrders = await GetSuccessfulOrderCount(userId);
         if (successfulOrders >= 10) discount += 0.10m;
-        
+
         return discount;
     }
 
@@ -179,5 +202,6 @@ public class OrderRepository : IOrderRepository
     }
 
 
-    
+
+
 }

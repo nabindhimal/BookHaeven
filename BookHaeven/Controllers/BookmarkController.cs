@@ -40,7 +40,7 @@ namespace BookHaeven.Controllers
         public async Task<ActionResult<BookmarkDto>> CreateBookmark(CreateBookmarkDto dto)
         {
             var userId = GetUserId();
-            // if (userId == null) return Unauthorized("User ID not found in token.");
+            if (userId == null) return Unauthorized("User ID not found in token.");
 
             // Check if book exists
             var book = await _bookRepo.GetByIdAsync(dto.BookId);
@@ -84,7 +84,6 @@ namespace BookHaeven.Controllers
         private Guid GetUserId()
         {
             return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            // return Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         }
 
         private static BookmarkDto ToDto(Bookmark bookmark) => new()

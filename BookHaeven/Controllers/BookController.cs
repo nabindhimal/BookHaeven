@@ -27,9 +27,6 @@ namespace BookHaeven.Controllers
         }
 
 
-        
-
-
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookDto createBookDto)
@@ -102,15 +99,6 @@ namespace BookHaeven.Controllers
             return Ok(Book.ToViewBookDto());
         }
 
-
-
-        // [HttpGet("paginated")]
-        // public async Task<IActionResult> GetPaginatedBooks([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        // {
-        //     var books = await _repo.GetPaginatedAsync(page, pageSize);
-        //     return Ok(books);
-        // }
-
         [HttpGet("paginated")]
         public async Task<ActionResult<List<ViewBookDto>>> GetPaginatedBooks(
         [FromQuery] int page = 1,
@@ -127,18 +115,6 @@ namespace BookHaeven.Controllers
             var books = await _repo.GetPaginatedAsync(page, pageSize, userId);
             return Ok(books);
         }
-
-
-        // [HttpGet("search")]
-        // public async Task<IActionResult> SearchBooks([FromQuery] BookQueryDto query)
-        // {
-
-        //     var books = await _repo.SearchAndFilterAsync(query);
-        //     var bookDtos = books.Select(b => b.ToViewBookDto()).ToList();
-        //     if (bookDtos.Count == 0) return Ok(new {message = "No books match the given criteria."});
-
-        //     return Ok(bookDtos);
-        // }
 
 
         [HttpGet("search")]

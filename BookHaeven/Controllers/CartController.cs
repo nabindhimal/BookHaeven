@@ -43,6 +43,61 @@ namespace BookHaeven.Controllers
             }));
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCartItem(Guid id, [FromBody] UpdateCartItemDto dto)
+        {
+            var userId = GetUserId();
+            var cartItem = await _cartRepo.GetByIdAsync(id);
+
+            if (cartItem == null || cartItem.UserId != userId)
+                return NotFound();
+
+            try
+            {
+                // Get the book to check stock
+                var book = await _bookRepo.GetByIdAsync(cartItem.BookId);
+                if (book == null) return NotFound("Book not found");
+
+                if (dto.Quantity <= 0)
+                    return BadRequest("Quantity must be positive");
+
+                if (book.Stock < dto.Quantity)
+                    return BadRequest(new
+                    {
+                        error = "STOCK_ERROR",
+                        message = $"Not enough stock. Only {book.Stock} available"
+                    });
+
+                cartItem.Quantity = dto.Quantity;
+                cartItem.UpdatedAt = DateTime.UtcNow;
+                await _cartRepo.UpdateAsync(cartItem);
+
+                return Ok(new CartItemDto
+                {
+                    Id = cartItem.Id,
+                    BookId = cartItem.BookId,
+                    BookTitle = cartItem.Book.Name,
+                    BookImageUrl = cartItem.Book.ImageUrl,
+                    OriginalPrice = cartItem.Book.Price,
+                    DiscountPercentage = cartItem.Book.DiscountPercentage,
+                    Price = cartItem.Book.DiscountPercentage.HasValue
+                        ? cartItem.Book.Price * (1 - cartItem.Book.DiscountPercentage.Value / 100)
+                        : cartItem.Book.Price,
+                    Quantity = cartItem.Quantity,
+                    AvailableStock = cartItem.Book.Stock
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = "SERVER_ERROR",
+                    message = ex.Message
+                });
+            }
+        }
+
+
         [HttpPost("add")]
         public async Task<ActionResult<CartItemDto>> AddToCart(AddToCartDto dto)
         {
@@ -75,11 +130,20 @@ namespace BookHaeven.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                // Return proper error object
+                return BadRequest(new
+                {
+                    error = "STOCK_ERROR",
+                    message = ex.Message,
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new
+                {
+                    error = "SERVER_ERROR",
+                    message = ex.Message
+                });
             }
         }
 
